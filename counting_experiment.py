@@ -290,12 +290,12 @@ class Channel:
       nuis = r.RooRealVar("%s"%name,"Nuisance - %s"%name,0,-3,3);
       nuis.setAttribute("NuisanceParameter_EXTERNAL",True);
       self.wspace_out._import(nuis)
-      nuis_IN = r.RooRealVar("nuis_IN_%s"%name,"Constraint Mean - %s"%name,0,-10,10);
-      nuis_IN.setConstant()
-      self.wspace_out._import(nuis_IN)
+      #nuis_IN = r.RooRealVar("nuis_IN_%s"%name,"Constraint Mean - %s"%name,0,-10,10);
+      #nuis_IN.setConstant()
+      #self.wspace_out._import(nuis_IN)
 
-      cont = r.RooGaussian("const_%s"%name,"Constraint - %s"%name,self.wspace_out.var(nuis.GetName()),self.wspace_out.var(nuis_IN.GetName()),r.RooFit.RooConst(1));
-      self.wspace_out._import(cont)
+      #cont = r.RooGaussian("const_%s"%name,"Constraint - %s"%name,self.wspace_out.var(nuis.GetName()),self.wspace_out.var(nuis_IN.GetName()),r.RooFit.RooConst(1));
+      #self.wspace_out._import(cont)
 
     sfup = self.scalefactors.GetName()+"_%s_"%name+"Up"
     sfdn = self.scalefactors.GetName()+"_%s_"%name+"Down"
@@ -331,7 +331,7 @@ class Channel:
     if setv!="":
       if "SetTo" in setv: 
        vv = float(setv.split("=")[1])
-       self.wspace_out.var("nuis_IN_%s"%name).setVal(vv)
+       #self.wspace_out.var("nuis_IN_%s"%name).setVal(vv)
        self.wspace_out.var("%s"%name).setVal(vv)
       else: 
       	print "DIRECTIVE %s IN SYSTEMATIC %s, NOT UNDERSTOOD!"%(setv,name)

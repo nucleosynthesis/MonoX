@@ -44,8 +44,8 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   # TRANSFERFACTORS are what is created above, eg WScales
 
   CRs = [
-   Channel("singlemuon",_wspace,out_ws,cid+'_'+model,WScales),
-   Channel("singleelectron",_wspace,out_ws,cid+'_'+model,WScalese)
+   Channel("singlemuon",_wspace,out_ws,cid+'_'+model,WScales)
+  ,Channel("singleelectron",_wspace,out_ws,cid+'_'+model,WScalese)
   ]
 
 
@@ -73,6 +73,7 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
     _fOut.WriteTObject(byb_d)
     print "Adding an error -- ", byb_u.GetName(),err
     CRs[0].add_nuisance_shape("%s_stat_error_%s_bin%d"%(cid,"singlemuonCR",b),_fOut)
+  
   for b in range(targetmc.GetNbinsX()):
     err = WScalese.GetBinError(b+1)
     if not WScalese.GetBinContent(b+1)>0: continue 
