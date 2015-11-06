@@ -50,17 +50,17 @@ for cat_id,cat in enumerate(x.categories):
       mb.addSample(sample,entry[0],entry[1],entry[2],entry[3])  # name, region, process, is_mc, is_signal
       try: 
         systematics = x.systematics
-	for sys in systematics: 
-	  extU = "_%sUp"%sys
-	  extD = "_%sDown"%sys
+	for syst in systematics: 
+	  extU = "_%sUp"%syst
+	  extD = "_%sDown"%syst
 	  if fin.Get(sample+extU):
-	    print " Adding systematic variation %s for %s "%(sys,sample)
-            mb.addSample(sample+extU,entry[0],entry[1]+extU,entry[2],entry[3])  # name, region, process, is_mc, is_signal
-	  else: print " No %s Up variation found for %s"%(sys,sample)
+	    print " Adding systematic variation %s for %s "%(syst,sample)
+            mb.addSample(sample+extU,entry[0],entry[1]+extU,entry[2],entry[3],0)  # name, region, process, is_mc, is_signal
+	  else: print " No %s Up variation found for %s"%(syst,sample)
 	  if fin.Get(sample+extD):
-	    print " Adding systematic variation %s for %s "%(sys,sample)
-            mb.addSample(sample+extD,entry[0],entry[1]+extD,entry[2],entry[3])  # name, region, process, is_mc, is_signal
-	  else: print " No %s Down variation found for %s"%(sys,sample)
+	    print " Adding systematic variation %s for %s "%(syst,sample)
+            mb.addSample(sample+extD,entry[0],entry[1]+extD,entry[2],entry[3],0)  # name, region, process, is_mc, is_signal
+	  else: print " No %s Down variation found for %s"%(syst,sample)
       except : print " No systematics found! "
 	  
   
@@ -69,5 +69,10 @@ for cat_id,cat in enumerate(x.categories):
   # Add any 'cutstring' for future reference
   cstr = r.TNamed("cut_category_%s"%cat['name'],cat["cutstring"])
   fdir.cd(); cstr.Write()
+
+# finally add the config used into the file 
+config = r.TMacro("%s"%(sys.argv[1]))
+config.ReadFile("configs/%s.py"%(sys.argv[1]))
+fout.cd(); config.Write()
 
 print "done!, Model saved in -> ", fout.GetName()

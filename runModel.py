@@ -43,6 +43,9 @@ for crd,crn in enumerate(controlregions_def):
 for cid,cn in enumerate(cmb_categories):
 	cn.init_channels()
         channels = cn.ret_channels()
+#for cid,cn in enumerate(cmb_categories):
+#        channels = cn.ret_channels()
+#	for ch in channels: ch.Print()
 
 # Save a Pre-fit snapshot
 out_ws.saveSnapshot("PRE_EXT_FIT_Clean",out_ws.allVars()) 

@@ -219,6 +219,11 @@ void diagonalizer::generateWeightedTemplate(TH1 *histNew, TH1 *pdf_num, std::str
   std::cout << " Generating weighted template " << histNew->GetName() << std::endl;
   // wvar will be the variable to reweight in 
   // var is the variable to be plotted
+  // Set bin Errors to 0 first 
+  for (int b=0;b<histNew->GetNbinsX();b++){
+     histNew->SetBinContent(b+1,0);
+     histNew->SetBinError(b+1,0);
+  }
   histNew->Sumw2();
   int nevents = data->numEntries();
   //const char *varname = var.GetName();
@@ -248,6 +253,10 @@ void diagonalizer::generateWeightedTemplate(TH1 *histNew, TH1 *pdf_num, std::str
 void diagonalizer::generateWeightedTemplate(TH1F *histNew, RooFormulaVar *pdf_num, RooRealVar &var, RooDataSet *data){
 
   std::cout << " Generating weighted template " << histNew->GetName() << std::endl;
+  for (int b=0;b<histNew->GetNbinsX();b++){
+     histNew->SetBinContent(b+1,0);
+     histNew->SetBinError(b+1,0);
+  }
   histNew->Sumw2();
   int nevents = data->numEntries();
   const char *varname = var.GetName();
@@ -272,6 +281,10 @@ void diagonalizer::generateTemplate(TH1 *histNew, std::string var, RooDataSet *d
 
   // wvar will be the variable to reweight in 
   // var is the variable to be plotted
+  for (int b=0;b<histNew->GetNbinsX();b++){
+     histNew->SetBinContent(b+1,0);
+     histNew->SetBinError(b+1,0);
+  }
   histNew->Sumw2();
   int nevents = data->numEntries();
   //const char *varname = var.GetName();

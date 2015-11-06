@@ -4,7 +4,7 @@ out_file_name = 'mono-x.root'
 
 # can define any thing useful here which may be common to several categories, eg binning in MET 
 #bins = range(200,1200,200)
-bins = [200,250,300,350,400,450,500,600,1000]
+bins = [200,250,300,350,400,500,600,1000]
 # will expect samples with sample_sys_Up/Down but will skip if not found 
 systematics=["Met","FP"]
 # Define each of the categories in a dictionary of the following form .. 
@@ -24,7 +24,8 @@ systematics=["Met","FP"]
  
 monojet_category = {
 	    'name':"monojet"
-	   ,'in_file_name':"monojet-combo-electron.root"
+	   #,'in_file_name':"/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/MonoX/../BaconAnalyzer/MJSelection/skim/monojet-combo-electron.root"  # Without recoil corrections
+	   ,'in_file_name':"/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/MonoX/monojet-combo-electron.root_recoil_old"
 	   ,"cutstring":"mvamet>200 && mvamet<1000"
 	   ,"varstring":["mvamet",200,1000]
 	   ,"weightname":"weight"
@@ -32,6 +33,7 @@ monojet_category = {
 	   #,"bins":[200.0 , 210.0 , 220.0 , 230.0 , 240.0 , 250.0 , 260.0 , 270.0 , 280.0 , 290.0 , 300.0 , 310.0 , 320.0 , 330.0,340,360,380,420,510,1000]
   	   ,"additionalvars":[['jet1pt',25,150,1000]]
 	   ,"pdfmodel":0
+	   ,"extra_cuts":[["singleelectron","rmet>40"],["photon","ptpho>200"]]
 	   ,"samples":
 	   	{  
 		  # Signal Region
@@ -51,6 +53,11 @@ monojet_category = {
 		  ,"P_200_100_signal"		   :['signal','pseudoscalar_200100',1,1]
 		  ,"P_200_10_signal"		   :['signal','pseudoscalar_200010',1,1]
 		  ,"P_200_1_signal"		   :['signal','pseudoscalar_200001',1,1]
+
+		  #,"A_2000_150_g025_signal"		   :['signal','axialvector_2000150',1,1]
+		  #,"A_2000_100_g025_signal"		   :['signal','axialvector_2000100',1,1]
+		  #,"A_2000_10_g025_signal"		   :['signal','axialvector_2000010',1,1]
+		  ,"A_2000_1_g025_signal"		   :['signal','axialvector_2000001',1,1]
 
 		  # Di muon-Control
 		  ,"Zll_di_muon_control"	   :['dimuon','zll',1,1]

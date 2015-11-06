@@ -90,8 +90,8 @@ class Bin:
    return self.initY
 
  def set_initY(self,mcdataset):
-   self.initY = self.wspace.data(mcdataset).sumEntries("%s>=%g && %s<%g"%(self.var.GetName(),self.xmin,self.var.GetName(),self.xmax),self.rngename)
-
+   #self.initY = self.wspace.data(mcdataset).sumEntries("%s>=%g && %s<%g"%(self.var.GetName(),self.xmin,self.var.GetName(),self.xmax),self.rngename)
+   self.initY = self.wspace.data(mcdataset).sumEntries("%s>=%g && %s<%g"%(self.var.GetName(),self.xmin,self.var.GetName(),self.xmax))
  def set_initE_precorr(self):
    return 0 
    self.initE_precorr = self.wspace_out.var("model_mu_cat_%s_bin_%d"%(self.catid,self.id)).getVal()*self.wspace_out.var(self.sfactor.GetName()).getVal()
@@ -113,6 +113,7 @@ class Bin:
 
  def set_sfactor(self,val):
    #print "Scale Factor for " ,self.binid,val
+   if val < 0: val = 0.0001
    if self.wspace_out.var("sfactor_%s"%self.binid): 
     self.sfactor.setVal(val)
     self.wspace_out.var(self.sfactor.GetName()).setVal(val)
@@ -215,9 +216,8 @@ class Bin:
    return self.wspace_out.var(self.model_mu.GetName()).getVal()
 
  def Print(self):
-   print "Channel/Bin -> ", self.chid,self.binid, ", Var -> ",self.var.GetName(), ", Range -> ", self.xmin,self.xmax , "MODEL MU (prefit/current state)= ",self.initY,"/",self.ret_model()
-   print " .... observed = ",self.o, ", expected = ", self.wspace_out.function(self.mu.GetName()).getVal(), " (of which %f is background)"%self.ret_background(), ", scale factor = ", self.wspace_out.function(self.sfactor.GetName()).getVal() 
-   print ", Pre-corrections (nuisance at 0) expected (-bkg) ", self.initE_precorr
+   print "Channel/Bin -> ", self.chid,self.binid, ", Var -> ",self.var.GetName(), ", Range -> ", self.xmin,self.xmax , "MODEL MU = ",self.initY
+   print " .... observed = ",self.o, ", expected = ", self.wspace_out.function(self.mu.GetName()).getVal(), ", scale factor = ", self.wspace_out.function(self.sfactor.GetName()).getVal() 
 
 class Channel:
   # This class holds a "channel" which is as dumb as saying it holds a dataset and scale factors 

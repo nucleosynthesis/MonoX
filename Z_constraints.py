@@ -34,15 +34,18 @@ def my_function(_wspace,_fin,_fOut,nam,diag):
   diag.generateWeightedDataset("photon_gjet_nlo_QCD",nlo_pho,wvarname,gvptname,_wspace,"photon_gjet")
 
   # Z+jets MC NLO, make a dataset. 
+  #nlo_zjt_NLO1j = fkFactorCentral.Get("znlo1/znlo1_nominal")
+  #nlo_zjt_LO    = fkFactorCentral.Get("zlo/zlo_nominal")
+  #nlo_zjt_NLO1j.Divide(nlo_zjt_LO)
   nlo_zjt_NLO1j = fkFactorCentral.Get("znlo012_over_znlo1/znlo012_over_znlo1")  # wrong way around so flip it 
   for b in range(nlo_zjt_NLO1j.GetNbinsX()): nlo_zjt_NLO1j.SetBinContent(b+1,1./nlo_zjt_NLO1j.GetBinContent(b+1))
   diag.generateWeightedDataset("signal_zjets_nlo1jt_QCD",nlo_zjt_NLO1j,wvarname,gvptname,_wspace,"signal_zjets")
 
   # Correct for the Eletroweak corrections ... (uncertainties from OLD files)
-  ewkCorr_pho = fkFactorCentral.Get("a_ewkcorr/a_ewkcorr") 
-  ewkCorr_zjt = fkFactorCentral.Get("z_ewkcorr/z_ewkcorr") 
-  diag.generateWeightedDataset("photon_gjet_nlo",nlo_pho,wvarname,gvptname,_wspace,"photon_gjet_nlo_QCD")
-  diag.generateWeightedDataset("signal_zjets_nlo1jt",nlo_zjt_NLO1j,wvarname,gvptname,_wspace,"signal_zjets_nlo1jt_QCD")
+  ewkCorr_pho = fkFactorCentral.Get("a_ewkcorr/a_ewkcorr_orig") 
+  ewkCorr_zjt = fkFactorCentral.Get("z_ewkcorr/z_ewkcorr_orig") 
+  diag.generateWeightedDataset("photon_gjet_nlo",ewkCorr_pho,wvarname,gvptname,_wspace,"photon_gjet_nlo_QCD")
+  diag.generateWeightedDataset("signal_zjets_nlo1jt",ewkCorr_zjt,wvarname,gvptname,_wspace,"signal_zjets_nlo1jt_QCD")
 
   # photon spectrum then ...
   nlo_pho_met = target.Clone(); nlo_pho_met.SetName("photon_weights_denom_%s"%nam); 
@@ -53,6 +56,9 @@ def my_function(_wspace,_fin,_fOut,nam,diag):
   nlo_zjt_met = target.Clone(); nlo_zjt_met.SetName("photon_weights_%s"%nam); 
   for b in range(nlo_zjt_met.GetNbinsX()): nlo_zjt_met.SetBinContent(b+1,0)
   diag.generateTemplate(nlo_zjt_met,metname,_wspace.data("signal_zjets_nlo1jt"))
+
+  # Keep this safe
+  nlo_zjt_metSpec = nlo_zjt_met.Clone(); nlo_zjt_metSpec.SetName("nlo1j_zjet_spectrum_met_%s"%nam); 
 
   # Weights !
   nlo_zjt_met.Divide(nlo_pho_met)
@@ -69,12 +75,13 @@ def my_function(_wspace,_fin,_fOut,nam,diag):
   mf2dn = fkFactor.Get("Z_pho_NLO_mf2Down")	; mf2dn.Divide(cen)
 
   # Get RMS and add to make up/down 
-  rmspdf = fkFactor.Get("RMS_NNPDF_Z_Pho_NLO")
-  pdfup = cen.Clone(); pdfup.SetName("gen_weights_%s_pdf_Up"%nam)
-  pdfdn = cen.Clone(); pdfdn.SetName("gen_weights_%s_pdf_Down"%nam)
-  for b in range(rmspdf.GetNbinsX()):
-    pdfup.SetBinContent(b+1,1.+(rmspdf.GetBinError(b+1)/rmspdf.GetBinContent(b+1)))
-    pdfdn.SetBinContent(b+1,1.-(rmspdf.GetBinError(b+1)/rmspdf.GetBinContent(b+1)))
+  #rmspdf = fkFactor.Get("RMS_NNPDF_Z_Pho_NLO")
+
+  cenY  = fkFactorCentral.Get("znlo1_over_anlo1/znlo1_over_anlo1"); 
+  pdfup = fkFactorCentral.Get("znlo1_over_anlo1/znlo1_over_anlo1_pdfUp"); pdfup.SetName("gen_weights_%s_pdf_Up"%nam)
+  pdfdn = fkFactorCentral.Get("znlo1_over_anlo1/znlo1_over_anlo1_pdfDown"); pdfdn.SetName("gen_weights_%s_pdf_Down"%nam)
+  pdfup.Divide(cenY)
+  pdfdn.Divide(cenY)
 
   # reweight the correct order Z.
   hmrup = target.Clone(); hmrup.SetName("photon_weights_%s_mr_Up"%nam); 
@@ -116,7 +123,7 @@ def my_function(_wspace,_fin,_fOut,nam,diag):
   for b in range(hmf2dn.GetNbinsX()): hmf2dn.SetBinContent(b+1,0)
   diag.generateWeightedTemplate(hmf2dn,mf2dn,gvptname,metname,_wspace.data("signal_zjets_nlo1jt"))
   hmf2dn.Divide(nlo_pho_met)
-  
+ 
   hpdfup = target.Clone(); hpdfup.SetName("photon_weights_%s_pdf_Up"%nam); 
   for b in range(hpdfup.GetNbinsX()): hpdfup.SetBinContent(b+1,0)
   diag.generateWeightedTemplate(hpdfup,pdfup,gvptname,metname,_wspace.data("signal_zjets_nlo1jt"))
@@ -127,6 +134,25 @@ def my_function(_wspace,_fin,_fOut,nam,diag):
   diag.generateWeightedTemplate(hpdfdn,pdfdn,gvptname,metname,_wspace.data("signal_zjets_nlo1jt"))
   hpdfdn.Divide(nlo_pho_met)
 
+  genewkphoDown = fkFactorCentral.Get("a_ewkcorr/a_ewkcorrDown_orig")
+  genewkphoUp   = fkFactorCentral.Get("a_ewkcorr/a_ewkcorrUp_orig")
+  genewkZDown = fkFactorCentral.Get("z_ewkcorr/z_ewkcorrDown_orig")
+  genewkZUp   = fkFactorCentral.Get("z_ewkcorr/z_ewkcorrUp_orig")
+
+  ewkPhoDown = target.Clone() ; ewkPhoDown.SetName("ewkPhoDown") 
+  diag.generateWeightedTemplate(ewkPhoDown,genewkphoDown,gvptname,metname,_wspace.data("photon_gjet_nlo_QCD"))
+  ewkPhoUp = target.Clone() ; ewkPhoUp.SetName("ewkPhoUp") 
+  diag.generateWeightedTemplate(ewkPhoUp,genewkphoUp,gvptname,metname,_wspace.data("photon_gjet_nlo_QCD"))
+  
+  ewkDown = target.Clone() ; ewkDown.SetName("photon_weights_%s_ewk_Down"%nam) 
+  diag.generateWeightedTemplate(ewkDown,genewkZDown,gvptname,metname,_wspace.data("signal_zjets_nlo1jt_QCD"))
+  ewkUp = target.Clone() ; ewkUp.SetName("photon_weights_%s_ewk_Up"%nam) 
+  diag.generateWeightedTemplate(ewkUp,genewkZUp,gvptname,metname,_wspace.data("signal_zjets_nlo1jt_QCD"))
+
+  ewkUp.Divide(ewkPhoUp)
+  ewkDown.Divide(ewkPhoDown)
+
+  """
   # Notice that the EWKUp was calculated on the g/Z ratio and Down is its inverse. So need to swap them 
   RatioEwkDown = fkFactor.Get("EWK_Dwon"); 
   for b in range(RatioEwkDown.GetNbinsX()): RatioEwkDown.SetBinContent(b+1,1./RatioEwkDown.GetBinContent(b+1))
@@ -142,20 +168,47 @@ def my_function(_wspace,_fin,_fOut,nam,diag):
   for b in range(ewkUp.GetNbinsX()): ewkUp.SetBinContent(b+1,0)
   diag.generateWeightedTemplate(ewkUp,RatioEwkUp,gvptname,metname,_wspace.data("signal_zjets_nlo1jt"))
   ewkUp.Divide(nlo_pho_met)
+  """
 
   # Footprint is a little different now, the dataset is photon_data_FPUp/Down so use relative uncertainty there
-  photon_data_nom  = _fin.Get("photon_data")
-  photon_data_fpup = _fin.Get("photon_data_FPUp")  ; photon_data_fpup.Divide(photon_data_nom)
-  photon_data_fpdn = _fin.Get("photon_data_FPDown"); photon_data_fpdn.Divide(photon_data_nom)
-  photon_weight_fpup = nlo_zjt_met.Clone(); photon_weight_fpup.SetName("photon_weights_%s_gamFootPrint_Up"%nam); photon_weight_fpup.Multiply(photon_data_fpup)
-  photon_weight_fpdn = nlo_zjt_met.Clone(); photon_weight_fpdn.SetName("photon_weights_%s_gamFootPrint_Down"%nam); photon_weight_fpdn.Multiply(photon_data_fpdn)
+  #photon_data_nom  = _fin.Get("photon_data")
+  #photon_data_fpup = _fin.Get("photon_data_FPUp")  ; photon_data_fpup.Divide(photon_data_nom)
+  #photon_data_fpdn = _fin.Get("photon_data_FPDown"); photon_data_fpdn.Divide(photon_data_nom)
+  FootPrintUnc = r.TFile.Open("files/FP_v2.root")
+  FPup = FootPrintUnc.Get("FP_Up")
+  FPdn = FootPrintUnc.Get("FP_Down")
+  
+  photon_weight_fpupD = nlo_zjt_met.Clone(); photon_weight_fpupD.SetName("photon_weights_denom_%s_gamFootPrint_Up"%nam); 
+  for b in range(photon_weight_fpupD.GetNbinsX()): photon_weight_fpupD.SetBinContent(b+1,0)
+  diag.generateWeightedTemplate(photon_weight_fpupD,FPup,"ptpho",metname,_wspace.data("photon_gjet_nlo"))
+  photon_weight_fpup = nlo_zjt_metSpec.Clone(); photon_weight_fpup.SetName("photon_weights_%s_gamFootPrint_Up"%nam)
+  photon_weight_fpup.Divide(photon_weight_fpupD)
+  
+  photon_weight_fpdnD = nlo_zjt_met.Clone(); photon_weight_fpdnD.SetName("photon_weights_denom_%s_gamFootPrint_Down"%nam); 
+  for b in range(photon_weight_fpdnD.GetNbinsX()): photon_weight_fpdnD.SetBinContent(b+1,0)
+  diag.generateWeightedTemplate(photon_weight_fpdnD,FPdn,"ptpho",metname,_wspace.data("photon_gjet_nlo"))
+  photon_weight_fpdn = nlo_zjt_metSpec.Clone(); photon_weight_fpdn.SetName("photon_weights_%s_gamFootPrint_Down"%nam)
+  photon_weight_fpdn.Divide(photon_weight_fpdnD)
+  
+  #photon_weight_fpdn.Multiply(photon_data_fpdn)
   
   # Same for electrons ..
-  dielectron_data_nom  = _fin.Get("dielectron_data")
-  dielectron_data_fpup = _fin.Get("dielectron_data_FPUp")  ; dielectron_data_fpup.Divide(dielectron_data_nom)
-  dielectron_data_fpdn = _fin.Get("dielectron_data_FPDown"); dielectron_data_fpdn.Divide(dielectron_data_nom)
-  dielectron_weight_fpup = ZeeScales.Clone(); dielectron_weight_fpup.SetName("zee_weights_%s_eleFootPrint_Up"%nam); dielectron_weight_fpup.Multiply(dielectron_data_fpup)
-  dielectron_weight_fpdn = ZeeScales.Clone(); dielectron_weight_fpdn.SetName("zee_weights_%s_eleFootPrint_Down"%nam); dielectron_weight_fpdn.Multiply(dielectron_data_fpdn)
+  #dielectron_data_nom  = _fin.Get("dielectron_data")
+  #dielectron_data_fpup = _fin.Get("dielectron_data_FPUp")  ; dielectron_data_fpup.Divide(dielectron_data_nom)
+  #dielectron_data_fpdn = _fin.Get("dielectron_data_FPDown"); dielectron_data_fpdn.Divide(dielectron_data_nom)
+  #dielectron_weight_fpup = ZeeScales.Clone(); dielectron_weight_fpup.SetName("zee_weights_%s_eleFootPrint_Up"%nam); dielectron_weight_fpup.Multiply(dielectron_data_fpup)
+  #dielectron_weight_fpdn = ZeeScales.Clone(); dielectron_weight_fpdn.SetName("zee_weights_%s_eleFootPrint_Down"%nam); dielectron_weight_fpdn.Multiply(dielectron_data_fpdn)
+  dielectron_weight_fpupD = nlo_zjt_met.Clone(); dielectron_weight_fpupD.SetName("zee_weights_denom_%s_eleFootPrint_Up"%nam); 
+  for b in range(dielectron_weight_fpupD.GetNbinsX()): dielectron_weight_fpupD.SetBinContent(b+1,0)
+  diag.generateWeightedTemplate(dielectron_weight_fpupD,FPup,"ptll",metname,_wspace.data("dielectron_zll"))
+  dielectron_weight_fpup = target.Clone(); dielectron_weight_fpup.SetName("zee_weights_%s_eleFootPrint_Up"%nam)
+  dielectron_weight_fpup.Divide(dielectron_weight_fpupD)
+  
+  dielectron_weight_fpdnD = nlo_zjt_met.Clone(); dielectron_weight_fpdnD.SetName("zee_weights_denom_%s_eleFootPrint_Down"%nam); 
+  for b in range(dielectron_weight_fpdnD.GetNbinsX()): dielectron_weight_fpdnD.SetBinContent(b+1,0)
+  diag.generateWeightedTemplate(dielectron_weight_fpdnD,FPdn,"ptll",metname,_wspace.data("dielectron_zll"))
+  dielectron_weight_fpdn = target.Clone(); dielectron_weight_fpdn.SetName("zee_weights_%s_eleFootPrint_Down"%nam)
+  dielectron_weight_fpdn.Divide(dielectron_weight_fpdnD)
   ##################################################################################################################
 
   _fOut.WriteTObject( nlo_zjt_met ) # Save weights and variations to file 
@@ -207,7 +260,7 @@ def my_function(_wspace,_fin,_fOut,nam,diag):
     _fOut.WriteTObject(ewk_d)
 
   # finally make a photon background dataset 
-  fPurity = r.TFile.Open("files/photonPurity.root")
+  fPurity = r.TFile.Open("files/photonPurity_13TeV.root")
   ptphopurity = fPurity.Get("data")
   photon_background = target.Clone(); photon_background.SetName("photon_gjet_background")
   for b in range(ptphopurity.GetNbinsX()): 
@@ -245,8 +298,14 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   # Create the transfer factors and save them (not here you can also create systematic variations of these 
   # transfer factors (named with extention _sysname_Up/Down
   ZmmScales = targetmc.Clone(); ZmmScales.SetName("zmm_weights_%s"%cid)
-  ZmmScales.Divide(controlmc)
+  ZmmScales.Divide(controlmc) 
+  ZmmScales.SetBinContent(ZmmScales.GetNbinsX(),ZmmScales.GetBinContent(ZmmScales.GetNbinsX()-1));
+  ZmmScalesOriginal = ZmmScales.Clone(); ZmmScalesOriginal.SetName("zmm_weights_nofit_%s"%cid)
+  # Fit this guy and replace bins with fitted version 
+  #ZmmScales.Fit("pol5") # last bin is crazy ? 
+  #for b in range(ZmmScales.GetNbinsX()): ZmmScales.SetBinContent(b+1,ZmmScales.GetFunction("pol5").Eval(ZmmScales.GetBinCenter(b+1)))
   _fOut.WriteTObject(ZmmScales)  # always write out to the directory 
+  _fOut.WriteTObject(ZmmScalesOriginal)  # always write out to the directory 
 
   #PhotonScales = targetmc.Clone(); PhotonScales.SetName("photon_weights_%s"%cid)
   #PhotonScales.Divide(controlmc_photon)
@@ -295,7 +354,6 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   CRs[1].add_nuisance("CMS_eff_m",0.01)
   CRs[2].add_nuisance("CMS_eff_e",0.01)
   CRs[2].add_nuisance_shape("eleFootPrint",_fOut)
-
   # Now for each bin in the distribution, we make one EWK uncertainty which is the size of  the Up/Down variation --> Completely uncorrelated between bins
   #for b in range(targetmc.GetNbinsX()):
    # CRs[2].add_nuisance_shape("ewk_W_%s_bin%d"%(cid,b),_fOut)
@@ -307,9 +365,9 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   # Bin by bin nuisances to cover statistical uncertainties ...
   for b in range(targetmc.GetNbinsX()):
     err = PhotonScales.GetBinError(b+1)
-    if not PhotonScales.GetBinContent(b+1)>0: continue 
-    relerr = err/PhotonScales.GetBinContent(b+1)
-    if relerr<0.01: continue
+    if not PhotonScales.GetBinContent(b+1)>0: relerr = 1.#continue 
+    else: relerr = err/PhotonScales.GetBinContent(b+1)
+    #if relerr<0.01: continue
     byb_u = PhotonScales.Clone(); byb_u.SetName("photon_weights_%s_%s_stat_error_%s_bin%d_Up"%(cid,cid,"photonCR",b))
     byb_u.SetBinContent(b+1,PhotonScales.GetBinContent(b+1)+err)
     byb_d = PhotonScales.Clone(); byb_d.SetName("photon_weights_%s_%s_stat_error_%s_bin%d_Down"%(cid,cid,"photonCR",b))
@@ -321,9 +379,9 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
 
   for b in range(targetmc.GetNbinsX()):
     err = ZmmScales.GetBinError(b+1)
-    if not ZmmScales.GetBinContent(b+1)>0: continue 
-    relerr = err/ZmmScales.GetBinContent(b+1)
-    if relerr<0.01: continue
+    if not ZmmScales.GetBinContent(b+1)>0: relerr=1. #continue 
+    else: relerr = err/ZmmScales.GetBinContent(b+1)
+    #if relerr<0.01: continue
     byb_u = ZmmScales.Clone(); byb_u.SetName("zmm_weights_%s_%s_stat_error_%s_bin%d_Up"%(cid,cid,"dimuonCR",b))
     byb_u.SetBinContent(b+1,ZmmScales.GetBinContent(b+1)+err)
     byb_d = ZmmScales.Clone(); byb_d.SetName("zmm_weights_%s_%s_stat_error_%s_bin%d_Down"%(cid,cid,"dimuonCR",b))
@@ -335,9 +393,9 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
 
   for b in range(targetmc.GetNbinsX()):
     err = ZeeScales.GetBinError(b+1)
-    if not ZeeScales.GetBinContent(b+1)>0: continue 
-    relerr = err/ZeeScales.GetBinContent(b+1)
-    if relerr<0.01: continue
+    if not ZeeScales.GetBinContent(b+1)>0: relerr = 1. #continue 
+    else: relerr = err/ZeeScales.GetBinContent(b+1)
+    #if relerr<0.01: continue
     byb_u = ZeeScales.Clone(); byb_u.SetName("zee_weights_%s_%s_stat_error_%s_bin%d_Up"%(cid,cid,"dielectronCR",b))
     byb_u.SetBinContent(b+1,ZeeScales.GetBinContent(b+1)+err)
     byb_d = ZeeScales.Clone(); byb_d.SetName("zee_weights_%s_%s_stat_error_%s_bin%d_Down"%(cid,cid,"dielectronCR",b))
@@ -349,7 +407,7 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   #######################################################################################################
 
 
-  cat = Category(model,cid,nam,_fin,_fOut,_wspace,out_ws,_bins,metname,targetmc.GetName(),CRs,diag)
+  cat = Category(model,cid,nam,_fin,_fOut,_wspace,out_ws,_bins,metname,"signal_zjets",CRs,diag)
   # Return of course
   #cat.addTarget("photon_gjet_background",-2)# -2 means dont apply any correction # make histogram for this guy?
   return cat

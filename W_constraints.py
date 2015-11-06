@@ -21,15 +21,35 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   targetmc     = _fin.Get("signal_wjets")      # define monimal (MC) of which process this config will model
   controlmc    = _fin.Get("singlemuon_wjets")  # defines in / out acceptance
   controlmce    = _fin.Get("singleelectron_wjets")  # defines in / out acceptance
+  genVpt = "genVpt"
+  # correct with NLO weights 
+  fkFactorCentral  = r.TFile.Open("files/scalefactors.root")
+  nlo_W = fkFactorCentral.Get("wnlo012_over_wlo/wnlo012_over_wlo")
+  diag.generateWeightedDataset("signal_wjets_nlo_QCD",nlo_W,"weight",genVpt,_wspace,"signal_wjets")
+  diag.generateWeightedDataset("singleelectron_wjets_nlo_QCD",nlo_W,"weight",genVpt,_wspace,"singleelectron_wjets")
+  diag.generateWeightedDataset("singlemuon_wjets_nlo_QCD",nlo_W,"weight",genVpt,_wspace,"singlemuon_wjets")
+
 
   # Create the transfer factors and save them (not here you can also create systematic variations of these 
   # transfer factors (named with extention _sysname_Up/Down
+  WScalesD = targetmc.Clone(); WScalesD.SetName("wmn_weights_den_%s"%cid)
+  for b in range(WScalesD.GetNbinsX()): WScalesD.SetBinContent(b+1,0)
+  diag.generateTemplate(WScalesD,metname,_wspace.data("singlemuon_wjets_nlo_QCD"))
+
+  WScaleseD = targetmc.Clone(); WScaleseD.SetName("wen_weights_den_%s"%cid)
+  for b in range(WScaleseD.GetNbinsX()): WScaleseD.SetBinContent(b+1,0)
+  diag.generateTemplate(WScaleseD,metname,_wspace.data("singleelectron_wjets_nlo_QCD"))
+
+  
   WScales = targetmc.Clone(); WScales.SetName("wmn_weights_%s"%cid)
-  WScales.Divide(controlmc)
+  for b in range(WScales.GetNbinsX()): WScales.SetBinContent(b+1,0)
+  diag.generateTemplate(WScales,metname,_wspace.data("signal_wjets_nlo_QCD"))
+  WScalese = WScales.Clone(); WScalese.SetName("wen_weights_%s"%cid)
+
+  WScales.Divide(WScalesD)
   _fOut.WriteTObject(WScales)  # always write out to the directory 
 
-  WScalese = targetmc.Clone(); WScalese.SetName("wen_weights_%s"%cid)
-  WScalese.Divide(controlmce)
+  WScalese.Divide(WScaleseD)
   _fOut.WriteTObject(WScalese)  # always write out to the directory 
   #######################################################################################################
 
@@ -62,9 +82,9 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   # Statistical uncertainties too!, one per bin 
   for b in range(targetmc.GetNbinsX()):
     err = WScales.GetBinError(b+1)
-    if not WScales.GetBinContent(b+1)>0: continue 
-    relerr = err/WScales.GetBinContent(b+1)
-    if relerr<0.01: continue
+    if not WScales.GetBinContent(b+1)>0: relerr=1.#continue 
+    else: relerr = err/WScales.GetBinContent(b+1)
+    #if relerr<0.01: continue
     byb_u = WScales.Clone(); byb_u.SetName("wmn_weights_%s_%s_stat_error_%s_bin%d_Up"%(cid,cid,"singlemuonCR",b))
     byb_u.SetBinContent(b+1,WScales.GetBinContent(b+1)+err)
     byb_d = WScales.Clone(); byb_d.SetName("wmn_weights_%s_%s_stat_error_%s_bin%d_Down"%(cid,cid,"singlemuonCR",b))
@@ -76,9 +96,9 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   
   for b in range(targetmc.GetNbinsX()):
     err = WScalese.GetBinError(b+1)
-    if not WScalese.GetBinContent(b+1)>0: continue 
-    relerr = err/WScalese.GetBinContent(b+1)
-    if relerr<0.01: continue
+    if not WScalese.GetBinContent(b+1)>0: relerr=1. #continue 
+    else: relerr = err/WScalese.GetBinContent(b+1)
+    #if relerr<0.01: continue
     byb_u = WScalese.Clone(); byb_u.SetName("wen_weights_%s_%s_stat_error_%s_bin%d_Up"%(cid,cid,"singleelectronCR",b))
     byb_u.SetBinContent(b+1,WScalese.GetBinContent(b+1)+err)
     byb_d = WScalese.Clone(); byb_d.SetName("wen_weights_%s_%s_stat_error_%s_bin%d_Down"%(cid,cid,"singleelectronCR",b))
@@ -90,7 +110,7 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   #######################################################################################################
 
 
-  cat = Category(model,cid,nam,_fin,_fOut,_wspace,out_ws,_bins,metname,targetmc.GetName(),CRs,diag)
+  cat = Category(model,cid,nam,_fin,_fOut,_wspace,out_ws,_bins,metname,"signal_wjets_nlo_QCD",CRs,diag)
   #cat.setDependant("zjets","wjetsdependant")  # Can use this to state that the "BASE" of this is already dependant on another process
   # EG if the W->lv in signal is dependant on the Z->vv and then the W->mv is depenant on W->lv, then 
   # give the arguments model,channel name from the config which defines the Z->vv => W->lv map! 

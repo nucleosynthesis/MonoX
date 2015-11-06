@@ -54,7 +54,7 @@ class ModelBuilder {
     wspace->import(weight);
     weightname = w;
   };
-  void addSample(std::string name, std::string region, std::string process, bool is_mc, bool is_signal);
+  void addSample(std::string name, std::string region, std::string process, bool is_mc, bool is_signal, bool saveDataset=true);
   void save();
   bool has_process(ControlRegion &cr,std::string proc);
   void run_corrections(std::string correction_name,std::string region);
