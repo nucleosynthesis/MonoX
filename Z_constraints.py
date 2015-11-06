@@ -407,7 +407,7 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   #######################################################################################################
 
 
-  cat = Category(model,cid,nam,_fin,_fOut,_wspace,out_ws,_bins,metname,"signal_zjets",CRs,diag)
+  cat = Category(model,cid,nam,_fin,_fOut,_wspace,out_ws,_bins,metname,"signal_zjets_nlo1jt",CRs,diag)  # start from EWK corrected Z also 
   # Return of course
   #cat.addTarget("photon_gjet_background",-2)# -2 means dont apply any correction # make histogram for this guy?
   return cat

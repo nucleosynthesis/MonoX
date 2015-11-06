@@ -25,7 +25,7 @@ systematics=["Met","FP"]
 monojet_category = {
 	    'name':"monojet"
 	   #,'in_file_name':"/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/MonoX/../BaconAnalyzer/MJSelection/skim/monojet-combo-electron.root"  # Without recoil corrections
-	   ,'in_file_name':"/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/MonoX/monojet-combo-electron.root_recoil_old"
+	   ,'in_file_name':"/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/MonoX/monojet-combo-electron.root_recoil"
 	   ,"cutstring":"mvamet>200 && mvamet<1000"
 	   ,"varstring":["mvamet",200,1000]
 	   ,"weightname":"weight"
@@ -33,7 +33,8 @@ monojet_category = {
 	   #,"bins":[200.0 , 210.0 , 220.0 , 230.0 , 240.0 , 250.0 , 260.0 , 270.0 , 280.0 , 290.0 , 300.0 , 310.0 , 320.0 , 330.0,340,360,380,420,510,1000]
   	   ,"additionalvars":[['jet1pt',25,150,1000]]
 	   ,"pdfmodel":0
-	   ,"extra_cuts":[["singleelectron","rmet>40"],["photon","ptpho>200"]]
+	   #,"extra_cuts":[["singleelectron","rmet>40"],["photon","ptpho>200"]]
+	   ,"extra_cuts":[["singleelectron","rmet>40"]]
 	   ,"samples":
 	   	{  
 		  # Signal Region
