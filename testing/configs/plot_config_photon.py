@@ -18,9 +18,10 @@ signals = {
 key_order = ["Fakes","#gamma+jet"]
 
 backgrounds = { 
-		"#gamma+jet":		  	[["pcr/gjet"],		r.kOrange+1,    0]
+		"#gamma+jet":		  	[["pcr/gjet"],		r.kGreen+1,    0]
 		,"Fakes":	  		[["pcr/non_prompt"],		r.kRed+2,   0]
 
 	      }
 
 dataname  = "mono-x.root:category_$CAT/photon_data"
+total =  "pcr/total_background"

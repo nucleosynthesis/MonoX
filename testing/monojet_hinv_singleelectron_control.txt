@@ -1,0 +1,38 @@
+Control Region Datacard -- monojet singleelectron
+
+imax * number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+
+-------------------------------------------------------------------------------------------------
+
+shapes data_obs    monojet_singleelectron_cr combined_model.root  combinedws:monojet_singleelectron_data 
+shapes wle   	   monojet_singleelectron_cr combined_model.root  combinedws:monojet_singleelectron_wjets_model
+shapes *   	   monojet_singleelectron_cr combined_model.root  combinedws:monojet_singleelectron_$PROCESS
+
+-------------------------------------------------------------------------------------------------
+bin 	     monojet_singleelectron_cr
+observation  -1 
+--------------------------------------------------------------------------------------------------------------------------------------------------
+bin          		monojet_singleelectron_cr   monojet_singleelectron_cr  monojet_singleelectron_cr       monojet_singleelectron_cr   monojet_singleelectron_cr 
+process      		wle		     	top		       dibosons	   qcd	          	       zll		
+process      		10       		2                      4           4                            1  
+rate         		1      		 	-1                     -1          -1                           -1 
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                                                                                               
+top_Norm	 lnN	-			1.1		       -           -                            -
+vv_Norm	 	 lnN	-			-		       1.1         -                            1.1
+QCD_Norm_se	 lnN	-			-		       -           2.0                          -
+lumi        	 lnN    -                       1.05                   1.05        1.05                         1.05
+
+-------------------------------------------------------------------------------------------------
+# Parametric uncertainties associated to control regions fits
+CMS_eff_e param 0.0 1
+pdf_CT10 param 0.0 1
+monojet_stat_error_singleelectronCR_bin0 param 0.0 1
+monojet_stat_error_singleelectronCR_bin1 param 0.0 1
+monojet_stat_error_singleelectronCR_bin2 param 0.0 1
+monojet_stat_error_singleelectronCR_bin3 param 0.0 1
+monojet_stat_error_singleelectronCR_bin4 param 0.0 1
+monojet_stat_error_singleelectronCR_bin5 param 0.0 1
+monojet_stat_error_singleelectronCR_bin6 param 0.0 1

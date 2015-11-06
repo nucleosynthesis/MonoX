@@ -27,3 +27,4 @@ backgrounds = {
 	      }
 
 dataname  = "mono-x.root:category_$CAT/singlemuon_data"
+total =  "smcr/total_background"

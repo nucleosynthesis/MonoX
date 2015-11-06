@@ -1,0 +1,72 @@
+Combination of dmcr=monojet_hinv_dimuon_control.txt  pcr=monojet_hinv_photon_control.txt  smcr=monojet_hinv_singlemuon_control.txt  sr=monojet_sr.txt
+imax 4 number of bins
+jmax 10 number of processes minus 1
+kmax 44 number of nuisance parameters
+----------------------------------------------------------------------------------------------------------------------------------
+shapes *           dmcr        combined_model.root combinedws:monojet_dimuon_$PROCESS
+shapes data_obs    dmcr        combined_model.root combinedws:monojet_dimuon_data
+shapes zmm         dmcr        combined_model.root combinedws:monojet_dimuon_zjets_model
+shapes data_obs    pcr         combined_model.root combinedws:monojet_photon_data
+shapes gjet        pcr         combined_model.root combinedws:monojet_photon_zjets_model
+shapes non_prompt  pcr         combined_model.root combinedws:monojet_photon_gjet_background
+shapes *           smcr        combined_model.root combinedws:monojet_singlemuon_$PROCESS
+shapes data_obs    smcr        combined_model.root combinedws:monojet_singlemuon_data
+shapes wlm         smcr        combined_model.root combinedws:monojet_singlemuon_wjets_model
+shapes *           sr          combined_model.root combinedws:monojet_signal_$PROCESS combinedws:monojet_signal_$PROCESS_$SYSTEMATIC
+shapes data_obs    sr          combined_model.root combinedws:monojet_signal_data
+shapes signal      sr          combined_model.root combinedws:monojet_signal_axialvector_2000001 combinedws:monojet_signal_axialvector_2000001_$SYSTEMATIC
+shapes wjets       sr          combined_model.root combinedws:monojet_signal_wjets_model
+shapes zjets       sr          combined_model.root combinedws:monojet_signal_zjets_model
+----------------------------------------------------------------------------------------------------------------------------------
+bin          dmcr   pcr    smcr   sr   
+observation  -1.0   -1.0   -1.0   -1.0 
+----------------------------------------------------------------------------------------------------------------------------------
+bin                              dmcr        dmcr        dmcr        pcr         pcr         smcr        smcr        smcr        smcr        smcr        sr          sr          sr          sr          sr          sr          sr        
+process                          top         dibosons    zmm         gjet        non_prompt  zll         top         qcd         wlm         dibosons    signal      zll         top         qcd         wjets       dibosons    zjets     
+process                          1           2           3           4           5           6           1           7           8           2           0           6           1           7           9           2           10        
+rate                             -1          -1          1.0000      1.0000      -1          -1          -1          -1          1.0000      -1          -1          -1          -1          -1          1.0000      -1          1.0000    
+----------------------------------------------------------------------------------------------------------------------------------
+QCD_Norm                lnN      -           -           -           -           -           -           -           -           -           -           -           -           -           2.0         -           -           -         
+QCD_Norm_sm             lnN      -           -           -           -           -           -           -           2.0         -           -           -           -           -           -           -           -           -         
+lumi                    lnN      1.05        1.05        -           -           -           1.05        1.05        1.05        -           1.05        1.05        1.05        1.05        1.05        -           1.05        -         
+photon_purity           lnN      -           -           -           -           1.5         -           -           -           -           -           -           -           -           -           -           -           -         
+tauEff                  lnN      -           -           -           -           -           -           -           -           -           -           -           -           -           -           1.025       -           -         
+top_Norm                lnN      1.1         -           -           -           -           -           1.1         -           -           -           -           -           1.1         -           -           -           -         
+vv_Norm                 lnN      -           1.1         -           -           -           1.1         -           -           -           1.1         -           -           -           -           -           1.2         -         
+monojet_stat_error_dimuonCR_bin2  param  0.0 1
+monojet_stat_error_dimuonCR_bin3  param  0.0 1
+monojet_stat_error_dimuonCR_bin0  param  0.0 1
+monojet_stat_error_dimuonCR_bin1  param  0.0 1
+monojet_stat_error_dimuonCR_bin6  param  0.0 1
+monojet_stat_error_dimuonCR_bin4  param  0.0 1
+monojet_stat_error_dimuonCR_bin5  param  0.0 1
+monojet_stat_error_singlemuonCR_bin1  param  0.0 1
+monojet_stat_error_singlemuonCR_bin0  param  0.0 1
+monojet_stat_error_singlemuonCR_bin3  param  0.0 1
+monojet_stat_error_singlemuonCR_bin2  param  0.0 1
+monojet_stat_error_singlemuonCR_bin5  param  0.0 1
+monojet_stat_error_singlemuonCR_bin4  param  0.0 1
+monojet_stat_error_singlemuonCR_bin6  param  0.0 1
+CMS_eff_m     param  0.0 1
+monojet_stat_error_photonCR_bin0  param  0.0 1
+monojet_stat_error_photonCR_bin1  param  0.0 1
+monojet_stat_error_photonCR_bin2  param  0.0 1
+monojet_stat_error_photonCR_bin3  param  0.0 1
+monojet_stat_error_photonCR_bin4  param  0.0 1
+monojet_stat_error_photonCR_bin5  param  0.0 1
+monojet_stat_error_photonCR_bin6  param  0.0 1
+mr2           param  0.0 1
+pdf_CT10      param  0.0 1
+PhotonEfficiency  param  0.0 1
+mf2           param  0.0 1
+ewk_monojet_bin3  param  0.0 1
+gamFootPrint  param  0.0 1
+mf            param  0.0 1
+mr            param  0.0 1
+ewk_monojet_bin2  param  0.0 1
+pdf           param  0.0 1
+ewk_monojet_bin0  param  0.0 1
+ewk_monojet_bin1  param  0.0 1
+ewk_monojet_bin6  param  0.0 1
+ewk_monojet_bin4  param  0.0 1
+ewk_monojet_bin5  param  0.0 1

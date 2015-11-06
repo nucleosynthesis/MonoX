@@ -15,16 +15,17 @@ signals = {
 	   #] ,r.kAzure+10	,0,1000]
 	   }
 
-#key_order = ["Z(#rightarrow ll)+jets","QCD","Dibosons","top","W(#rightarrow e#nu)+jets"]
-key_order = ["Z(#rightarrow ll)+jets","Dibosons","top","W(#rightarrow e#nu)+jets"]
+key_order = ["Z(#rightarrow ll)+jets","Dibosons","QCD","top","W(#rightarrow e#nu)+jets"]
+#key_order = ["Z(#rightarrow ll)+jets","Dibosons","top","W(#rightarrow e#nu)+jets"]
 
 backgrounds = { 
 		"top":			  	[["secr/top"],		r.kRed+1,   0]
 		,"Dibosons":		  	[["secr/dibosons"],	r.kGray,    0]
 		,"Z(#rightarrow ll)+jets":	[["secr/zll"],		r.kGreen+3, 0]
-		,"W(#rightarrow e#nu)+jets":  [["secr/wle"], 		r.kAzure-3, 0]
-		#,"QCD":	  		        [["secr/qcd"],		r.kRed+2,   0]
+		,"W(#rightarrow e#nu)+jets":    [["secr/wle"], 		r.kAzure-3, 0]
+		,"QCD":	  		        [["secr/qcd"],		r.kRed+2,   0]
 
 	      }
 
 dataname  = "mono-x.root:category_$CAT/singleelectron_data"
+total =  "secr/total_background"

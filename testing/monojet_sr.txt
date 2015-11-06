@@ -1,0 +1,33 @@
+Signal Region Datacard -- monojet category
+
+imax * number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+shapes data_obs  monojet   combined_model.root combinedws:monojet_signal_data 
+shapes zjets     monojet   combined_model.root combinedws:monojet_signal_zjets_model
+shapes wjets     monojet   combined_model.root combinedws:monojet_signal_wjets_model
+shapes signal    monojet combined_model.root combinedws:monojet_signal_axialvector_2000001 combinedws:monojet_signal_axialvector_2000001_$SYSTEMATIC 
+shapes *         monojet   combined_model.root combinedws:monojet_signal_$PROCESS combinedws:monojet_signal_$PROCESS_$SYSTEMATIC 
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+bin 	     monojet
+observation  -1 
+-------------------------------------------------------------------------------------------------------------------------------------------
+bin          		 monojet      monojet      monojet      monojet      monojet      monojet   monojet  
+process      		 zll          top          qcd     	dibosons     zjets        wjets     signal 
+process      		 1            2            3       	4            5            6         -1      
+rate        		 -1           -1           -1      	-1           1            1         -1      
+------------------------------------------------------------------------------------------------------------
+# Normal uncertainties in the signal region 
+
+lumi	          lnN    1.05         1.05         1.05         1.05         -           -          1.05
+QCD_Norm      	  lnN    -            -            2.0          -            -           -          -       
+top_Norm      	  lnN    -            1.1          -            -            -           -          -       
+vv_Norm       	  lnN    -            -            -            1.20         -           -          -       
+tauEff            lnN    -            -            -            -            -           1.025      -       
+#CMS_scale_j      lnN    -            0.974        -            1.003        -           -          1.006   
+#Met               shape  1.0          1.0          1.0          1.0          -           -          1.0     
+-------------------------------------------------------------------------------------------------------------------------------------------
