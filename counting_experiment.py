@@ -513,6 +513,8 @@ class Category:
      self.channels.append(ch)
    # fit is buggered so need to scale by 1.1
 
+   uncertainties_u = [0 for b in range(len(self._bins)-1) ]
+   uncertainties_d = [0 for b in range(len(self._bins)-1) ]
    
    for j,cr in enumerate(self._control_regions):
    #save the prefit histos
@@ -523,11 +525,41 @@ class Category:
     self.all_hists.append(cr_pre_hist.Clone())
     self.cr_prefit_hists.append(cr_pre_hist.Clone())
 
+    for i,bl in enumerate(self.channels):
+     if i >= len(self._bins)-1 : break
+     for nuis in cr.ret_nuisances(): 
+      # find the modifier function for rate
+      fname =  "sys_function_%s_cat_%s_ch_%s_bin_%d"%(nuis,self.catid,cr.chid,i)
+      default  = self._wspace_out.var(nuis).getVal()
+      sfac = cr.ret_sfactor(i)
+      self._wspace_out.var(nuis).setVal(default+1); u = 1./(sfac*(1+self._wspace_out.function(fname).getVal()))
+      self._wspace_out.var(nuis).setVal(default-1); d = 1./(sfac*(1+self._wspace_out.function(fname).getVal()))
+      self._wspace_out.var(nuis).setVal(default);   c = 1./(sfac*(1+self._wspace_out.function(fname).getVal()))   # make sure last thing is to set back to default
+
+      if u>c: uncertainties_u[i] += (u-c)**2
+      else : uncertainties_d[i]  += (u-c)**2
+      if d>c: uncertainties_u[i] += (d-c)**2
+      else : uncertainties_d[i]  += (d-c)**2
+      print fname, u-c, d-c
+
+     uncertainties_u[i] = uncertainties_u[i]**0.5
+     uncertainties_d[i] = uncertainties_d[i]**0.5
+    # Finally, make a histogram which has uncertainties on the scale factors (R)
+
+    hist_errs = r.TGraphAsymmErrors(); hist_errs.SetName(cr.scalefactors.GetName()+"_uncert")
+    for p in range(len(self._bins)-1): 
+      hist_errs.SetPoint(p,cr.scalefactors.GetBinCenter(p+1),cr.scalefactors.GetBinContent(p+1))
+      bw = cr.scalefactors.GetBinWidth(p+1)
+      hist_errs.SetPointError(p,bw/2,bw/2,uncertainties_d[p],uncertainties_u[p])
+    self._fout.WriteTObject(hist_errs)
+
+
    for i,bl in enumerate(self.channels):
     if i >= len(self._bins)-1 : break
     model_mu = self._wspace_out.var("model_mu_cat_%s_bin_%d"%(bl.catid,bl.id))
     #self._wspace_out.var(model_mu.GetName()).setVal(1.2*model_mu.getVal())
-   
+
+
   def ret_control_regions(self): 
    return self._control_regions
 
