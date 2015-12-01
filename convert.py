@@ -1,7 +1,7 @@
 import ROOT
 ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
 
-def convertToCombineWorkspace(wsin_combine,f_simple_hists,categories,cmb_categories,controlregions_def):
+def convertToCombineWorkspace(wsin_combine,f_simple_hists,categories,cmb_categories,controlregions_def,renameVariable=""):
 
 #wsout_combine = ROOT.RooWorkspace("mono-x-ws","mono-x-ws")
 #wsout_combine._import = getattr(wsout_combine,"import") # workaround: import is a python keyword
@@ -15,14 +15,25 @@ def convertToCombineWorkspace(wsin_combine,f_simple_hists,categories,cmb_categor
    wlocal = fdir.Get("wspace_%s"%cat)
 
    # pick up the number of bins FROM one of the usual guys 
-   samplehist = fdir.Get("signal_data")
+   samplehistos = fdir.GetListOfKeys()
+   for s in samplehistos: 
+     obj = s.ReadObj()
+     if type(obj)!=type(ROOT.TH1F()): continue
+     if obj.GetTitle() != "base": continue # Forget all of the histos which aren't the observable variable
+     samplehist = obj
+     break
    nbins = samplehist.GetNbinsX()
    varname = samplehist.GetXaxis().GetTitle()
 
-   # import a Renamed copy of the variable ...
    varl = wlocal.var(varname)
-   varnameext = varname+"_%s"%cat
-   varl.SetName(varnameext)
+
+   if renameVariable!="": 
+    varl.SetName(renameVariable)
+
+   else:
+    # import a Renamed copy of the variable ...
+    varnameext = varname+"_%s"%cat
+    varl.SetName(varnameext)
 
    # Keys in the fdir 
    keys_local = fdir.GetListOfKeys() 

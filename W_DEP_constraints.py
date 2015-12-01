@@ -19,31 +19,31 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   processName = "WJets" # Give a name of the process being modelled
   metname = "mvamet"    # Observable variable name 
   targetmc     = _fin.Get("signal_wjets")      # define monimal (MC) of which process this config will model
-  controlmc    = _fin.Get("singlemuon_wjets")  # defines in / out acceptance
-  controlmce    = _fin.Get("singleelectron_wjets")  # defines in / out acceptance
   genVpt = "genVpt"
+
   # correct with NLO weights 
   fkFactorCentral  = r.TFile.Open("files/scalefactors.root")
   nlo_W = fkFactorCentral.Get("wnlo012_over_wlo/wnlo012_over_wlo")
-  diag.generateWeightedDataset("signal_wjets_nlo_QCD",nlo_W,"weight",genVpt,_wspace,"signal_wjets")
-  diag.generateWeightedDataset("singleelectron_wjets_nlo_QCD",nlo_W,"weight",genVpt,_wspace,"singleelectron_wjets")
-  diag.generateWeightedDataset("singlemuon_wjets_nlo_QCD",nlo_W,"weight",genVpt,_wspace,"singlemuon_wjets")
+  diag.generateWeightedDataset("signal_wjets_nlo012jt_QCD",nlo_W,"weight",genVpt,_wspace,"signal_wjets")
+  ewkCorr_wjt = fkFactorCentral.Get("w_ewkcorr/w_ewkcorr_orig") 
+  diag.generateWeightedDataset("signal_wjets_nlo012jt",ewkCorr_wjt,"weight",genVpt,_wspace,"signal_wjets_nlo012jt_QCD")
 
+  diag.generateWeightedDataset("singlemuon_wjets_nlo_QCD",nlo_W,"weight",genVpt,_wspace,"singlemuon_wjets")
+  diag.generateWeightedDataset("singleelectron_wjets_nlo_QCD",nlo_W,"weight",genVpt,_wspace,"singleelectron_wjets")
+
+  diag.generateWeightedDataset("singleelectron_wjets_nlo",ewkCorr_wjt,"weight",genVpt,_wspace,"singleelectron_wjets_nlo_QCD")
+  diag.generateWeightedDataset("singlemuon_wjets_nlo",ewkCorr_wjt,"weight",genVpt,_wspace,"singlemuon_wjets_nlo_QCD")
 
   # Create the transfer factors and save them (not here you can also create systematic variations of these 
-  # transfer factors (named with extention _sysname_Up/Down
   WScalesD = targetmc.Clone(); WScalesD.SetName("wmn_weights_den_%s"%cid)
-  for b in range(WScalesD.GetNbinsX()): WScalesD.SetBinContent(b+1,0)
-  diag.generateTemplate(WScalesD,metname,_wspace.data("singlemuon_wjets_nlo_QCD"))
+  diag.generateTemplate(WScalesD,metname,_wspace.data("singlemuon_wjets_nlo"))
 
   WScaleseD = targetmc.Clone(); WScaleseD.SetName("wen_weights_den_%s"%cid)
-  for b in range(WScaleseD.GetNbinsX()): WScaleseD.SetBinContent(b+1,0)
-  diag.generateTemplate(WScaleseD,metname,_wspace.data("singleelectron_wjets_nlo_QCD"))
+  diag.generateTemplate(WScaleseD,metname,_wspace.data("singleelectron_wjets_nlo"))
 
   
   WScales = targetmc.Clone(); WScales.SetName("wmn_weights_%s"%cid)
-  for b in range(WScales.GetNbinsX()): WScales.SetBinContent(b+1,0)
-  diag.generateTemplate(WScales,metname,_wspace.data("signal_wjets_nlo_QCD"))
+  diag.generateTemplate(WScales,metname,_wspace.data("signal_wjets_nlo012jt"))
   WScalese = WScales.Clone(); WScalese.SetName("wen_weights_%s"%cid)
 
   WScales.Divide(WScalesD)
@@ -110,7 +110,7 @@ def cmodel(cid,nam,_f,_fOut, out_ws, diag):
   #######################################################################################################
 
 
-  cat = Category(model,cid,nam,_fin,_fOut,_wspace,out_ws,_bins,metname,"signal_wjets_nlo_QCD",CRs,diag)
+  cat = Category(model,cid,nam,_fin,_fOut,_wspace,out_ws,_bins,metname,"signal_wjets_nlo012jt",CRs,diag)
   cat.setDependant("zjets","wjetssignal")  # Can use this to state that the "BASE" of this is already dependant on another process
   # EG if the W->lv in signal is dependant on the Z->vv and then the W->mv is depenant on W->lv, then 
   # give the arguments model,channel name from the config which defines the Z->vv => W->lv map! 

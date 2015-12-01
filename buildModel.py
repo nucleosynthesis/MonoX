@@ -1,10 +1,18 @@
 import ROOT as r
 import array, sys
 
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("","--skip",default=False,action='store_true',help="Ignore missing samples rather than failing")
+(options,args) = parser.parse_args()
+
+
 # Configurations Read in from Separate .py files
 sys.path.append("configs")
 #import categories_config_vtag as x
-x = __import__(sys.argv[1]) 
+configuration = args[0]
+x = __import__(configuration) 
 
 # book category should read list of samples and append them to as histograms 
 # expect formats of 
@@ -47,7 +55,15 @@ for cat_id,cat in enumerate(x.categories):
   samples = cat['samples'].keys()
   for sample in samples:
       entry = cat['samples'][sample]
-      mb.addSample(sample,entry[0],entry[1],entry[2],entry[3])  # name, region, process, is_mc, is_signal
+      print sample
+      if not options.skip:  mb.addSample(sample,entry[0],entry[1],entry[2],entry[3])  # name, region, process, is_mc, is_signal
+      else : 
+        try: 
+	     sampentry = fin.Get(sample)
+ 	     sampentry.GetEntries()
+	     mb.addSample(sample,entry[0],entry[1],entry[2],entry[3])  # name, region, process, is_mc, is_signal
+        except : print " No Tree %s found, skipping "%sample
+
       try: 
         systematics = x.systematics
 	for syst in systematics: 
@@ -61,7 +77,8 @@ for cat_id,cat in enumerate(x.categories):
 	    print " Adding systematic variation %s for %s "%(syst,sample)
             mb.addSample(sample+extD,entry[0],entry[1]+extD,entry[2],entry[3],0)  # name, region, process, is_mc, is_signal
 	  else: print " No %s Down variation found for %s"%(syst,sample)
-      except : print " No systematics found! "
+      except : 
+          noSys = True
 	  
   
   mb.save()
@@ -71,8 +88,8 @@ for cat_id,cat in enumerate(x.categories):
   fdir.cd(); cstr.Write()
 
 # finally add the config used into the file 
-config = r.TMacro("%s"%(sys.argv[1]))
-config.ReadFile("configs/%s.py"%(sys.argv[1]))
+config = r.TMacro("%s"%(args[0]))
+config.ReadFile("configs/%s.py"%(args[0]))
 fout.cd(); config.Write()
 
 print "done!, Model saved in -> ", fout.GetName()
