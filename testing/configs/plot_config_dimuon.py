@@ -25,3 +25,4 @@ backgrounds = {
 	      }
 
 dataname  = "mono-x.root:category_$CAT/dimuon_data"
+total =  "dmcr/total_background"

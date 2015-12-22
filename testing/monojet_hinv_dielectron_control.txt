@@ -1,0 +1,37 @@
+Control Region Datacard -- monojet dielectron
+
+imax * number of bins
+jmax * number of processes minus 1
+kmax * number of nuisance parameters
+
+-------------------------------------------------------------------------------------------------
+
+shapes data_obs    monojet_dielectron_cr combined_model.root  combinedws:monojet_dielectron_data 
+shapes zee   	   monojet_dielectron_cr combined_model.root  combinedws:monojet_dielectron_zjets_model
+shapes *   	   monojet_dielectron_cr combined_model.root  combinedws:monojet_dielectron_$PROCESS
+
+-------------------------------------------------------------------------------------------------
+bin 	     monojet_dielectron_cr
+observation  -1 
+-------------------------------------------------------------------------------------------------
+bin          		monojet_dielectron_cr   	monojet_dielectron_cr      monojet_dielectron_cr     
+process      		zee		     	top		       dibosons		
+process      		9       		2                      4  
+rate         		1      		 	-1                     -1 
+-------------------------------------------------------------------------------------------------
+
+top_Norm	 lnN	-			1.10		       -
+vv_Norm	 	 lnN	-			-		       1.1
+lumi        	 lnN    -                       1.05                   1.05 
+
+-------------------------------------------------------------------------------------------------
+# Parametric uncertainties associated to control regions fits
+CMS_eff_e param 0.0 1
+eleFootPrint param 0.0 1
+monojet_stat_error_dielectronCR_bin0 param 0.0 1
+monojet_stat_error_dielectronCR_bin1 param 0.0 1
+monojet_stat_error_dielectronCR_bin2 param 0.0 1
+monojet_stat_error_dielectronCR_bin3 param 0.0 1
+monojet_stat_error_dielectronCR_bin4 param 0.0 1
+monojet_stat_error_dielectronCR_bin5 param 0.0 1
+monojet_stat_error_dielectronCR_bin6 param 0.0 1

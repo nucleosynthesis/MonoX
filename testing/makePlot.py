@@ -7,6 +7,7 @@ parser.add_option("-c","--cat",default='',help="pick up a category name for $CAT
 parser.add_option("-v","--var",default='DEFAULT',help="pick up a variable name for $VAR")
 parser.add_option("-o","--outext",default='',help="Add Extension to output name")
 parser.add_option("-x","--xlab",default='',help="Set the Label for X-axis")
+parser.add_option("-t","--title",default='',help="Title")
 parser.add_option("-b","--batch",default=False,action='store_true',help="always run in batch and save .pdf with config name instead of drawing canvas")
 parser.add_option("-g","--gendata",default=False,action='store_true',help="Generate Pretend data from the background")
 parser.add_option("-p","--pull",default=False,action='store_true',help="replace the ratio plot with a pull (data-background)/(sigma_{data+bkg})")
@@ -162,6 +163,10 @@ for ic,config in enumerate(configs) :
   legentries.append([x.backgrounds[bkg][2],bkg,"F"])
   totalc+=1
  
+ if x.total!="":
+   print "Taking total from ", x.directory+x.total
+   totalbackground = di.Get(x.directory+x.total)
+   totalbkg  = di.Get(x.directory+x.total)
  legentries.reverse()
  for le in legentries: leg.AddEntry(le[0],le[1],le[2])
  thstack.Draw("histFsame")
@@ -190,7 +195,7 @@ for ic,config in enumerate(configs) :
   print "	Nevents ", sig_t, totalsignal.Integral("width")
    #procs.append([tmp.GetName(),tmp.Integral("width")])
   allsignal = totalsignal
-
+ 
  normtotalback = getNormalizedHist(totalbackground,data,False)
  print "Total Background " , normtotalback.Integral("width")
  procs.append(["total bkg",normtotalback.Integral("width")])
@@ -205,7 +210,7 @@ for ic,config in enumerate(configs) :
 		data.SetBinContent(b,normtotalback.GetBinContent(b))
 		data.SetBinError(b,((normtotalback.GetBinContent(b))**0.5)/data.GetBinWidth(b))
 
- normtotalback.SetFillStyle(3144);
+ normtotalback.SetFillStyle(3001);
  normtotalback.SetFillColor(1);
  normtotalback.SetMarkerSize(0);
  normtotalback.Draw("E2same");
@@ -228,7 +233,7 @@ for ic,config in enumerate(configs) :
  if not options.nolog: pad1.SetLogy()
  pad1.RedrawAxis()
  lat.DrawLatex(0.1,0.92,"#bf{CMS} #it{Preliminary}") 
- if options.cat : lat.DrawLatex(0.76,0.92,options.cat) 
+ if options.title : lat.DrawLatex(0.68,0.92,options.title) 
 
  can.cd()
  pad2 = r.TPad("p2","p2",0,0.068,1,0.28)

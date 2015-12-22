@@ -26,5 +26,6 @@ backgrounds = {
 		,"QCD":	  		        [["sr/qcd"],		r.kRed+2,   0]
 
 	      }
-
+# take the background from some histogram, not the stack!, useful for histograms 
+total =  "sr/total_background"
 dataname  = "mono-x.root:category_$CAT/signal_data"

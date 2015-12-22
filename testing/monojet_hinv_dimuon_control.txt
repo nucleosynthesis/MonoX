@@ -20,16 +20,17 @@ process      		9       		2                      4
 rate         		1      		 	-1                     -1 
 -------------------------------------------------------------------------------------------------
 
-top_Norm8TeV	 lnN	-			1.07		       -
-vv_Norm8TeV	 lnN	-			-		       1.1
-lumi_8TeV        lnN    -                       1.026                  1.026 
+top_Norm	 lnN	-			1.10		       -
+vv_Norm	 	 lnN	-			-		       1.1
+lumi        	 lnN    -                       1.05                   1.05 
 
 -------------------------------------------------------------------------------------------------
 # Parametric uncertainties associated to control regions fits
 CMS_eff_m param 0.0 1
+monojet_stat_error_dimuonCR_bin0 param 0.0 1
+monojet_stat_error_dimuonCR_bin1 param 0.0 1
 monojet_stat_error_dimuonCR_bin2 param 0.0 1
 monojet_stat_error_dimuonCR_bin3 param 0.0 1
 monojet_stat_error_dimuonCR_bin4 param 0.0 1
 monojet_stat_error_dimuonCR_bin5 param 0.0 1
 monojet_stat_error_dimuonCR_bin6 param 0.0 1
-monojet_stat_error_dimuonCR_bin7 param 0.0 1

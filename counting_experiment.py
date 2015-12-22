@@ -90,8 +90,8 @@ class Bin:
    return self.initY
 
  def set_initY(self,mcdataset):
-   self.initY = self.wspace.data(mcdataset).sumEntries("%s>=%g && %s<%g"%(self.var.GetName(),self.xmin,self.var.GetName(),self.xmax),self.rngename)
-
+   #self.initY = self.wspace.data(mcdataset).sumEntries("%s>=%g && %s<%g"%(self.var.GetName(),self.xmin,self.var.GetName(),self.xmax),self.rngename)
+   self.initY = self.wspace.data(mcdataset).sumEntries("%s>=%g && %s<%g"%(self.var.GetName(),self.xmin,self.var.GetName(),self.xmax))
  def set_initE_precorr(self):
    return 0 
    self.initE_precorr = self.wspace_out.var("model_mu_cat_%s_bin_%d"%(self.catid,self.id)).getVal()*self.wspace_out.var(self.sfactor.GetName()).getVal()
@@ -113,6 +113,7 @@ class Bin:
 
  def set_sfactor(self,val):
    #print "Scale Factor for " ,self.binid,val
+   if val < 0: val = 0.0001
    if self.wspace_out.var("sfactor_%s"%self.binid): 
     self.sfactor.setVal(val)
     self.wspace_out.var(self.sfactor.GetName()).setVal(val)
@@ -215,9 +216,8 @@ class Bin:
    return self.wspace_out.var(self.model_mu.GetName()).getVal()
 
  def Print(self):
-   print "Channel/Bin -> ", self.chid,self.binid, ", Var -> ",self.var.GetName(), ", Range -> ", self.xmin,self.xmax , "MODEL MU (prefit/current state)= ",self.initY,"/",self.ret_model()
-   print " .... observed = ",self.o, ", expected = ", self.wspace_out.function(self.mu.GetName()).getVal(), " (of which %f is background)"%self.ret_background(), ", scale factor = ", self.wspace_out.function(self.sfactor.GetName()).getVal() 
-   print ", Pre-corrections (nuisance at 0) expected (-bkg) ", self.initE_precorr
+   print "Channel/Bin -> ", self.chid,self.binid, ", Var -> ",self.var.GetName(), ", Range -> ", self.xmin,self.xmax , "MODEL MU = ",self.initY
+   print " .... observed = ",self.o, ", expected = ", self.wspace_out.function(self.mu.GetName()).getVal(), ", scale factor = ", self.wspace_out.function(self.sfactor.GetName()).getVal() 
 
 class Channel:
   # This class holds a "channel" which is as dumb as saying it holds a dataset and scale factors 
@@ -290,12 +290,12 @@ class Channel:
       nuis = r.RooRealVar("%s"%name,"Nuisance - %s"%name,0,-3,3);
       nuis.setAttribute("NuisanceParameter_EXTERNAL",True);
       self.wspace_out._import(nuis)
-      nuis_IN = r.RooRealVar("nuis_IN_%s"%name,"Constraint Mean - %s"%name,0,-10,10);
-      nuis_IN.setConstant()
-      self.wspace_out._import(nuis_IN)
+      #nuis_IN = r.RooRealVar("nuis_IN_%s"%name,"Constraint Mean - %s"%name,0,-10,10);
+      #nuis_IN.setConstant()
+      #self.wspace_out._import(nuis_IN)
 
-      cont = r.RooGaussian("const_%s"%name,"Constraint - %s"%name,self.wspace_out.var(nuis.GetName()),self.wspace_out.var(nuis_IN.GetName()),r.RooFit.RooConst(1));
-      self.wspace_out._import(cont)
+      #cont = r.RooGaussian("const_%s"%name,"Constraint - %s"%name,self.wspace_out.var(nuis.GetName()),self.wspace_out.var(nuis_IN.GetName()),r.RooFit.RooConst(1));
+      #self.wspace_out._import(cont)
 
     sfup = self.scalefactors.GetName()+"_%s_"%name+"Up"
     sfdn = self.scalefactors.GetName()+"_%s_"%name+"Down"
@@ -331,7 +331,7 @@ class Channel:
     if setv!="":
       if "SetTo" in setv: 
        vv = float(setv.split("=")[1])
-       self.wspace_out.var("nuis_IN_%s"%name).setVal(vv)
+       #self.wspace_out.var("nuis_IN_%s"%name).setVal(vv)
        self.wspace_out.var("%s"%name).setVal(vv)
       else: 
       	print "DIRECTIVE %s IN SYSTEMATIC %s, NOT UNDERSTOOD!"%(setv,name)
@@ -513,6 +513,8 @@ class Category:
      self.channels.append(ch)
    # fit is buggered so need to scale by 1.1
 
+   uncertainties_u = [0 for b in range(len(self._bins)-1) ]
+   uncertainties_d = [0 for b in range(len(self._bins)-1) ]
    
    for j,cr in enumerate(self._control_regions):
    #save the prefit histos
@@ -523,11 +525,41 @@ class Category:
     self.all_hists.append(cr_pre_hist.Clone())
     self.cr_prefit_hists.append(cr_pre_hist.Clone())
 
+    for i,bl in enumerate(self.channels):
+     if i >= len(self._bins)-1 : break
+     for nuis in cr.ret_nuisances(): 
+      # find the modifier function for rate
+      fname =  "sys_function_%s_cat_%s_ch_%s_bin_%d"%(nuis,self.catid,cr.chid,i)
+      default  = self._wspace_out.var(nuis).getVal()
+      sfac = cr.ret_sfactor(i)
+      self._wspace_out.var(nuis).setVal(default+1); u = 1./(sfac*(1+self._wspace_out.function(fname).getVal()))
+      self._wspace_out.var(nuis).setVal(default-1); d = 1./(sfac*(1+self._wspace_out.function(fname).getVal()))
+      self._wspace_out.var(nuis).setVal(default);   c = 1./(sfac*(1+self._wspace_out.function(fname).getVal()))   # make sure last thing is to set back to default
+
+      if u>c: uncertainties_u[i] += (u-c)**2
+      else : uncertainties_d[i]  += (u-c)**2
+      if d>c: uncertainties_u[i] += (d-c)**2
+      else : uncertainties_d[i]  += (d-c)**2
+      print fname, u-c, d-c
+
+     uncertainties_u[i] = uncertainties_u[i]**0.5
+     uncertainties_d[i] = uncertainties_d[i]**0.5
+    # Finally, make a histogram which has uncertainties on the scale factors (R)
+
+    hist_errs = r.TGraphAsymmErrors(); hist_errs.SetName(cr.scalefactors.GetName()+"_uncert")
+    for p in range(len(self._bins)-1): 
+      hist_errs.SetPoint(p,cr.scalefactors.GetBinCenter(p+1),cr.scalefactors.GetBinContent(p+1))
+      bw = cr.scalefactors.GetBinWidth(p+1)
+      hist_errs.SetPointError(p,bw/2,bw/2,uncertainties_d[p],uncertainties_u[p])
+    self._fout.WriteTObject(hist_errs)
+
+
    for i,bl in enumerate(self.channels):
     if i >= len(self._bins)-1 : break
     model_mu = self._wspace_out.var("model_mu_cat_%s_bin_%d"%(bl.catid,bl.id))
     #self._wspace_out.var(model_mu.GetName()).setVal(1.2*model_mu.getVal())
-   
+
+
   def ret_control_regions(self): 
    return self._control_regions
 

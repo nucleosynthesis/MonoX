@@ -25,3 +25,4 @@ backgrounds = {
 	      }
 
 dataname  = "mono-x.root:category_$CAT/dielectron_data"
+total =  "decr/total_background"

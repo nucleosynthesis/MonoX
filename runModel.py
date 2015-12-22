@@ -1,9 +1,9 @@
 #########################################################################################
 # Setup the basics ----> USER DEFINED SECTION HERE ------------------------------------//
 fOutName = "combined_model.root"  # --> Output file
-fName    = "mono-x-2.root"  # --> input file (i.e output from previous)
+fName    = "mono-x.root"  # --> input file (i.e output from previous)
 categories = ["monojet"] # --> Should be labeled as in original config 
-controlregions_def = ["Z_constraints","W_constraints"] # --> configuration configs for control region fits. 
+controlregions_def = ["Z_constraints","W_DEP_constraints"] # --> configuration configs for control region fits. 
 # Note if one conrol region def depends on another (i,e if setDependant() is called) it must come AFTER its 
 # the one it depends on in this list!
 #--------------------------------------------------------------------------------------//
@@ -43,6 +43,9 @@ for crd,crn in enumerate(controlregions_def):
 for cid,cn in enumerate(cmb_categories):
 	cn.init_channels()
         channels = cn.ret_channels()
+#for cid,cn in enumerate(cmb_categories):
+#        channels = cn.ret_channels()
+#	for ch in channels: ch.Print()
 
 # Save a Pre-fit snapshot
 out_ws.saveSnapshot("PRE_EXT_FIT_Clean",out_ws.allVars()) 

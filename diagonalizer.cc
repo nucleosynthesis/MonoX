@@ -45,6 +45,7 @@ class diagonalizer {
     void freezeParameters(RooArgSet *args, bool freeze=true);
     void generateWeightedTemplate(TH1F *, RooFormulaVar *, RooRealVar &, RooDataSet *);
     void generateWeightedTemplate(TH1 *histNew, TH1 *pdf_num, std::string wvar, std::string var, RooDataSet *data);
+    void generateTemplate(TH1 *histNew, std::string var, RooDataSet *data);
     void generateWeightedDataset(std::string newname, TH1 *pdf_num, std::string wvarname, std::string wvar, RooWorkspace *wspace, std::string dataname);
     TH2F *retCovariance();
     TH2F *retCorrelation();
@@ -215,8 +216,14 @@ void diagonalizer::freezeParameters(RooArgSet *args, bool freeze){
 }
 void diagonalizer::generateWeightedTemplate(TH1 *histNew, TH1 *pdf_num, std::string wvar, std::string var, RooDataSet *data){
 
+  std::cout << " Generating weighted template " << histNew->GetName() << std::endl;
   // wvar will be the variable to reweight in 
   // var is the variable to be plotted
+  // Set bin Errors to 0 first 
+  for (int b=0;b<histNew->GetNbinsX();b++){
+     histNew->SetBinContent(b+1,0);
+     histNew->SetBinError(b+1,0);
+  }
   histNew->Sumw2();
   int nevents = data->numEntries();
   //const char *varname = var.GetName();
@@ -245,6 +252,11 @@ void diagonalizer::generateWeightedTemplate(TH1 *histNew, TH1 *pdf_num, std::str
 
 void diagonalizer::generateWeightedTemplate(TH1F *histNew, RooFormulaVar *pdf_num, RooRealVar &var, RooDataSet *data){
 
+  std::cout << " Generating weighted template " << histNew->GetName() << std::endl;
+  for (int b=0;b<histNew->GetNbinsX();b++){
+     histNew->SetBinContent(b+1,0);
+     histNew->SetBinError(b+1,0);
+  }
   histNew->Sumw2();
   int nevents = data->numEntries();
   const char *varname = var.GetName();
@@ -264,6 +276,25 @@ void diagonalizer::generateWeightedTemplate(TH1F *histNew, RooFormulaVar *pdf_nu
     histNew->Fill(val,cweight);
   }
   histNew->GetXaxis()->SetTitle(varname);
+}
+void diagonalizer::generateTemplate(TH1 *histNew, std::string var, RooDataSet *data){
+
+  // wvar will be the variable to reweight in 
+  // var is the variable to be plotted
+  for (int b=0;b<histNew->GetNbinsX();b++){
+     histNew->SetBinContent(b+1,0);
+     histNew->SetBinError(b+1,0);
+  }
+  histNew->Sumw2();
+  int nevents = data->numEntries();
+  //const char *varname = var.GetName();
+  for (int ev=0;ev<nevents;ev++){
+    const RooArgSet *vw = data->get(ev);
+    double val    = vw->getRealValue(var.c_str());
+    double weight = data->weight();
+    histNew->Fill(val,weight);
+  }
+  histNew->GetXaxis()->SetTitle(var.c_str());
 }
 void diagonalizer::generateWeightedDataset(std::string newname, TH1 *pdf_num, std::string wvarname, std::string wvar, RooWorkspace *wspace, std::string dataname){
 
