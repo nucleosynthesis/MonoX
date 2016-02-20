@@ -25,6 +25,18 @@ def parser():
    (options,args) = rparser.parse_args()
    return options
 
+def getXS(iMed,iId,basedir='/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_3_3/src/genproductions/bin/JHUGen/'):
+    lFile  = ROOT.TFile(basedir+'/patches/WZXS.root')
+    label="ZH"
+    if iId == 24:
+       label="WH"
+    lG     = lFile.Get(label)
+    lScale = lFile.Get("scaleUp")
+    scale=int(iMed)+91+15 # 15 is an approximation of the extra energy based on matching xsections at 125                                                                                           
+    if iId == 24:
+       scale=int(iMed)+80+15
+    return lG.Eval(iMed)*lScale.Eval(scale)
+
 def end():
     if __name__ == '__main__':
         rep = ''
@@ -47,7 +59,6 @@ def makeHist(filename,var,baseweight,treename,label,normalize=''):
    for i0  in range(0,len(y)):
       x.append(y[i0])
    if len(filename) != 0:
-      print filename
       lFile = ROOT.TFile.Open(filename)
       lTree = lFile.Get(treename)
       lHist = ROOT.TH1F(label,label,len(x)-1,x)
@@ -61,7 +72,7 @@ def makeHist(filename,var,baseweight,treename,label,normalize=''):
       lHist.Scale(1./lTree.GetEntries(normalize))
    return lHist
 
-def reweight(label,DM,Med,Width,gq,gdm,process,basentuple,basename,basecut,iOutputName,iVId=0,iBR=1):
+def reweight(label,DM,Med,Width,gq,gdm,process,basentuple,basename,basecut,basecutReco,iOutputName,iVId=0,iBR=1):
    xs = [1,1]
    scale = 1
    h1=makeHist('','',basecut,'Events','model')
@@ -78,20 +89,22 @@ def reweight(label,DM,Med,Width,gq,gdm,process,basentuple,basename,basecut,iOutp
       loadmonov(DM,Med,Width,process,gq,gdm)
    label='MonoJ_%s_%s_%s_%s.root'    % (str(int(Med)),str(int(DM)),str(int(Width)),str(int(process)))
    weight1="evtweight*1000*"+basecut+"*"
-   weight2="weight*"        +basecut
+   weight2="weight*"        +basecutReco
    var1="v_pt"
-   var2="genVpt"
+   var2="genMediatorPt"
    Norm1='(v_pt > 0)'
    Norm2=''
    if iVId > 0:
-      label=label.replace("MonoJ","MonoV")
-      weight1="xs2*"+basecut.replace("23","23")+"*"
-      weight2="xs*"+basecut.replace("23","24")+"*"
-      Norm1='(abs(v_id) == '+str(iVId)+')'
-      #Norm2='(abs(v_id) == '+str(iVId)+')'
-      Norm2='(abs(v_id) == 24)'
       var1="v_pt"
-      var2="v_pt"
+      var2="genVBosonPt"
+      label=label.replace("MonoJ","MonoV")
+      weight1="xs"
+      if process < 802:
+         weight1=weight1+"2"
+      if process > 802:
+         weight1=weight1+"*"+str(getXS(Med,iVId))
+      weight1=weight1+"*1000*"+basecut.replace("23","23")+"*"
+      Norm1='(abs(v_id) == '+str(iVId)+')'
       
    h1=makeHist(label     ,var1,weight1+Norm1,'Events','model',Norm1)
    h2=makeHist(basentuple,var2,weight2+Norm2,basename,'base' ,Norm2)           
@@ -107,7 +120,7 @@ def reweight(label,DM,Med,Width,gq,gdm,process,basentuple,basename,basecut,iOutp
    lOFile.Close()
    return xs
 
-def reweightNtuple(iFile,iTreeName,iHistName,iOTreeName,iMonoV,iHiggsPt=False,histlabel='model'):
+def reweightNtuple(iFile,iTreeName,iHistName,iOTreeName,iClass,iMonoV,iHiggsPt=False,histlabel='model'):
    print iFile,iTreeName,iHistName,iOTreeName,iMonoV
    lHFile = ROOT.TFile('%s' % (iHistName))
    h1     = lHFile.Get(histlabel)
@@ -117,22 +130,23 @@ def reweightNtuple(iFile,iTreeName,iHistName,iOTreeName,iMonoV,iHiggsPt=False,hi
    #Now reweight the ntuple
    lFile  = ROOT.TFile('%s' % iFile)
    lTree  = lFile.Get(iTreeName)
-   lOFile = ROOT.TFile('RWTree%s' % (iHistName),'UPDATE')
-   lOTree = lTree.CloneTree(0)
+   lOFile = ROOT.TFile('tmpRWTree%s' % (iHistName),'RECREATE')
+   lFTree = lTree.CopyTree(iClass)
+   lOTree = lFTree.CloneTree(0)
    lOTree.SetTitle(iOTreeName)
    lOTree.SetName(iOTreeName)
    w1 = numpy.zeros(1, dtype=float)
    w2 = numpy.zeros(1, dtype=float)
    lOTree.Branch("oldweight",w2,"w2/D")
    lOTree.SetBranchAddress("weight",w1)
-   for i0 in range(lTree.GetEntriesFast()):
-      lTree.GetEntry(i0)
+   for i0 in range(lFTree.GetEntriesFast()):
+      lFTree.GetEntry(i0)
       #if iMonoV:
       #   genpt = lTree.genvpt
       #else:
-      genpt = lTree.genVpt
+      genpt = lFTree.genMediatorPt
       w1[0] = 1
-      w2[0] = lTree.weight
+      w2[0] = lFTree.weight
       w1[0] = h1.GetBinContent(h1.FindBin(genpt))*baseweight
       w1[0] = w1[0] * w2[0]
       lOTree.Fill()
@@ -141,8 +155,6 @@ def reweightNtuple(iFile,iTreeName,iHistName,iOTreeName,iMonoV,iHiggsPt=False,hi
    return iTreeName
 
 def treeName(proc,med,dm,iId):
-   if iId > 0:
-      return 'Events'
    Name='V'
    if proc == 801:
       Name='A'
@@ -150,8 +162,11 @@ def treeName(proc,med,dm,iId):
       Name='S'
    if proc == 806:
       Name='P'
+   if iId == 24:
+      Name="MonoW_"+Name
+   if iId == 23:
+      Name="MonoZ_"+Name
    Name="%s_%s_%s_signal" % (Name,int(med),int(dm))
-   print Name,"!!!"
    return Name
       
 if __name__ == "__main__":
@@ -165,7 +180,8 @@ if __name__ == "__main__":
    proc=options.proc
    BRGG=1
    baseid=0
-   cut=monojet
+   cuts=[monojet,boosted]
+   cutsReco=[monojetReco,boostedReco]
    monoV = False
    if options.monoW:
       baseid=24
@@ -176,26 +192,31 @@ if __name__ == "__main__":
       baseid=23
       cut=boosted+"*(abs(v_id) == 23)"
       monoV =  True
+   
+   if not monoV:
+      cuts[1]     = monojet
+      cutsReco[1] = monojetReco
 
    #Determine the sample to use reweighting by scanning
    basetree,trees=obtainbase(baseid,dm,med,proc,options.hinv)
-   basetree=basetree.replace('MonoZ','MonoW')
-   trees   =trees.replace('MonoZ','MonoW')
    basetreegen=basetree
    os.system('cmsStage %s/%s .' % (eosbasedir,basetree))
    treesgen=trees
-   if options.monoW or options.monoZ:
-      basetreegen=basetree.replace(".root_0","_Gen.root")
-      os.system('cmsStage %s/%s .' % (eosbasedir,basetreegen))
-      treesgen='Events'
    #List them
    print "Ntuples : ",basetree,"-- using",trees,label,trees
-   
-   #Loop through the categories and build the weight hitograms as listed in rwfile
-   xsGG=reweight(label,dm,med,width,gq,gdm,proc,basetreegen,treesgen,cut,'ggHRWmonojet.root',baseid,BRGG)
 
-   #Build ntuples with modified weights => if blank re-assign
-   reweightNtuple(basetree,trees,'ggHRWmonojet.root',treeName(proc,med,dm,baseid),monoV)
+   os.system('rm *ggHRWmonojet.root')
+   for i0 in range(0,len(cuts)):
+      #Loop through the categories and build the weight hitograms as listed in rwfile
+      xsGG=reweight(label,dm,med,width,gq,gdm,proc,basetreegen,treesgen,cuts[i0],cutsReco[i0],'ggHRWmonojet.root',baseid,BRGG)
+      idcut='(id=='+str(i0+1)+')'
+      #Build ntuples with modified weights => if blank re-assign
+      reweightNtuple(basetree,trees,'ggHRWmonojet.root',treeName(proc,med,dm,baseid),idcut,monoV)
+      if i0 > 0:
+         os.system('hadd tmp2TreeggHRWmonojet.root RWTreeggHRWmonojet.root tmpRWTreeggHRWmonojet.root')
+         os.system('mv tmp2TreeggHRWmonojet.root tmpRWTreeggHRWmonojet.root')
+      os.system('mv tmpRWTreeggHRWmonojet.root RWTreeggHRWmonojet.root')
+
    name='MonoJ_%s_%s_%s_%s.root' % (int(med),int(dm),int(width),int(proc))
    if options.monoZ:
       name=name.replace('MonoJ','MonoZ')

@@ -132,7 +132,7 @@ def generateMonoV_VH(mass,width,med,process,gq,gdm,label,filename,dty="/afs/cern
 def generateMonoVAH(mass,width,med,process,gq,gdm,label,filename,dty="/afs/cern.ch/user/p/pharris/pharris/public/bacon/Darkmatter"):
    os.system('cp %s/runJHU13.sh             .'%dty)
    os.system('./runJHU13.sh  %s %s %s        '% ( med, str(int(process)),filename))
-   os.system('cmsRm       /store/cmst3/group/monojet/mc/%s/%s ' %(label,filename))
+   os.system('%s rm       /store/cmst3/group/monojet/mc/%s/%s ' %(eos,label,filename))
    os.system('cmsStage %s /store/cmst3/group/monojet/mc/%s/%s ' %(filename,label,filename))
 
 def generateGen(xs,filename,label,monoV,dty="/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/BaconAnalyzer/GenSelection/prod/"):
@@ -166,7 +166,7 @@ def generateGen(xs,filename,label,monoV,dty="/afs/cern.ch/user/p/pharris/pharris
    #sub_file.write('cp -r %s/../bin/files . \n' % dty)
    sub_file.write('runGen  -1 %s %s 0 \n' % (filename,xs))
    sub_file.write('mv Output.root %s \n' % filename)
-   sub_file.write('cmsRm       /store/cmst3/group/monojet/mc/%s/%s \n' %(label,filename))
+   sub_file.write('%s rm       /store/cmst3/group/monojet/mc/%s/%s \n' %(eos,label,filename))
    sub_file.write('cmsStage %s /store/cmst3/group/monojet/mc/%s/%s \n' %(filename,label,filename))
    #sub_file.write('cmsRm       /store/cmst3/user/pharris/mc/%s/%s \n' %(label,filename))
    #sub_file.write('cmsStage %s /store/cmst3/user/pharris/mc/%s/%s \n' %(filename,label,filename))
@@ -234,11 +234,11 @@ def loadmonov(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
    else:
       if proc == 800 or proc == 801 or proc == 810 or proc == 811 or proc == 820 or proc == 821 : 
          generateMonoV_AV(dm,width,med,proc,gq,gdm)
-         generateGen(-1,filename,label,True)
+         generateGen(-1,filename,'model3',True)
       else :
          #generateMonoV_VH(dm,width,med,proc,gq,gdm,label,filename)
-         generateMonoVAH(dm,width,med,proc,gq,gdm,label,filename)
-
+         generateMonoVAH(dm,width,med,proc,gq,gdm,'model3',filename)
+         
 def loadttDM(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
    filename='ttDM_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
    if fileExists(filename,label):
@@ -268,4 +268,4 @@ if __name__ == "__main__":
     if not options.monov : 
        loadmonojet(options.dm,options.med,options.width,options.proc,options.gq,options.gdm,options.label,options.lhe)
     else : 
-       loadmonov(options.dm,options.med,options.width,options.proc,options.gq,options.gdm,options.label,options.lhe)
+       loadmonov(options.dm,options.med,options.width,options.proc,options.gq,options.gdm,options.label+'M',options.lhe)
