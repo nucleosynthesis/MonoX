@@ -4,32 +4,34 @@ from optparse import OptionParser
 
 eos='/afs/cern.ch/project/eos/installation/cms/bin/eos.select'
 
-parser = OptionParser()
-parser.add_option('--override',action='store_true',     dest='override',default=False,help='Use Specified Ntuples') # need a few more options for monoV
-parser.add_option('--dm'   ,action='store',type='float',dest='dm'    ,default=10,  help='Dark Matter Mass')
-parser.add_option('--med'  ,action='store',type='float',dest='med'   ,default=2000,help='Mediator Mass')
-parser.add_option('--width',action='store',type='float',dest='width' ,default=1,   help='Width (in Min width units)')
-parser.add_option('--proc' ,action='store',type='float',dest='proc'  ,default=806, help='Process(800=V,801=A,805=S,806=P)')
-parser.add_option('--gq'   ,action='store',type='float',dest='gq'    ,default=1,   help='coupling to quarks')
-parser.add_option('--gdm'  ,action='store',type='float',dest='gdm'   ,default=1,   help='coupling to dark matter')
-parser.add_option('--label',action='store',type='string',dest='label',default='model3',help='eos label')
-parser.add_option('--monoV'   ,action='store_true',     dest='monov',default=False,help='Run mono V generation') # need a few more options for monoV
-parser.add_option('--bbDM'    ,action='store_true',     dest='bbdm' ,default=False,help='Run bb+DM generation') # need a few more options for monoV
-parser.add_option('--ttDM'    ,action='store_true',     dest='ttdm' ,default=False,help='Run tt+DM generation') # need a few more options for monoV
-parser.add_option('--writeLHE',action='store_true',     dest='lhe'  ,default=False,help='write LHE as well')
-parser.add_option('--hinv'    ,action='store_true',     dest='hinv' ,default=False,help='Higgs Invisible') # need a few more options for monoV
-parser.add_option('--monoJ'   ,action='store_true',     dest='monoJ',default=False,help='Just Monojet') # need a few more options for monoV
-parser.add_option('--mj'      ,action='store',          dest='mj'      ,default='ggH125_signal',help='Monojet Base') # need a few more options for monoV
-parser.add_option('--zh'      ,action='store',          dest='zh'      ,default='ZH125_signal',help='ZH Base') # need a few more options for monoV
-parser.add_option('--wh'      ,action='store',          dest='wh'      ,default='WH125_signal',help='WH Base') # need a few more options for monoV
-(options,args) = parser.parse_args()
+def parser():
+   parser = OptionParser()
+   parser.add_option('--override',action='store_true',     dest='override',default=False,help='Use Specified Ntuples') # need a few more options for monoV
+   parser.add_option('--dm'   ,action='store',type='float',dest='dm'    ,default=10,  help='Dark Matter Mass')
+   parser.add_option('--med'  ,action='store',type='float',dest='med'   ,default=2000,help='Mediator Mass')
+   parser.add_option('--width',action='store',type='float',dest='width' ,default=1,   help='Width (in Min width units)')
+   parser.add_option('--proc' ,action='store',type='float',dest='proc'  ,default=806, help='Process(800=V,801=A,805=S,806=P)')
+   parser.add_option('--gq'   ,action='store',type='float',dest='gq'    ,default=0.25,help='coupling to quarks')
+   parser.add_option('--gdm'  ,action='store',type='float',dest='gdm'   ,default=1,   help='coupling to dark matter')
+   parser.add_option('--label',action='store',type='string',dest='label',default='model3',help='eos label')
+   parser.add_option('--monoV'   ,action='store_true',     dest='monov',default=False,help='Run mono V generation') # need a few more options for monoV
+   parser.add_option('--bbDM'    ,action='store_true',     dest='bbdm' ,default=False,help='Run bb+DM generation') # need a few more options for monoV
+   parser.add_option('--ttDM'    ,action='store_true',     dest='ttdm' ,default=False,help='Run tt+DM generation') # need a few more options for monoV
+   parser.add_option('--writeLHE',action='store_true',     dest='lhe'  ,default=False,help='write LHE as well')
+   parser.add_option('--hinv'    ,action='store_true',     dest='hinv' ,default=False,help='Higgs Invisible') # need a few more options for monoV
+   parser.add_option('--monoJ'   ,action='store_true',     dest='monoJ',default=False,help='Just Monojet') # need a few more options for monoV
+   parser.add_option('--mj'      ,action='store',          dest='mj'      ,default='ggH125_signal',help='Monojet Base') # need a few more options for monoV
+   parser.add_option('--zh'      ,action='store',          dest='zh'      ,default='ZH125_signal',help='ZH Base') # need a few more options for monoV
+   parser.add_option('--wh'      ,action='store',          dest='wh'      ,default='WH125_signal',help='WH Base') # need a few more options for monoV
+   (options,args) = parser.parse_args()
+   return options
 
 def generateMonoJet(mass,med,width,process,gq,gdm,lhe):
    os.system('rm -rf POWHEG-BOX-V2')
-   os.system('cmsStage /store/cmst3/user/pharris/gen/POWHEG-BOX-V2_gen_8TeV.tar.gz .')
-   os.system('tar xzvf POWHEG-BOX-V2_gen_8TeV.tar.gz')
+   os.system('cmsStage /store/cmst3/user/pharris/gen/POWHEG-BOX-V2_gen.tar.gz .')
+   os.system('tar xzvf POWHEG-BOX-V2_gen.tar.gz')
    #dty='/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/MonoX/ModelScan/python'
-   print './run.py --med %d --dm %d --proc %d --g %d' % (med,mass,process,gq)
+   print './run.py --med %d --dm %d --proc %d --g %f' % (med,mass,process,gq)
    sub_file = open('runpowheg.sh','w')
    sub_file.write('#!/bin/bash\n')
    sub_file.write('scramv1 project CMSSW CMSSW_7_1_19 \n')
@@ -43,7 +45,7 @@ def generateMonoJet(mass,med,width,process,gq,gdm,lhe):
    if process > 804 and process < 808: 
       pwg='POWHEG-BOX-V2/DMS_tloop'
       sub_file.write('cd POWHEG-BOX-V2/DMS_tloop\n')
-   sub_file.write('./run.py --med %d --dm %d --proc %d --g %d \n' %  (med,mass,process,gq))
+   sub_file.write('./run.py --med %d --dm %d --proc %d --g %f \n' %  (med,mass,process,gq))
    sub_file.close()
    os.system('chmod +x %s' % os.path.abspath(sub_file.name))
    os.system('%s' % os.path.abspath(sub_file.name))
@@ -92,9 +94,9 @@ def generateMonoV_AV(mass,width,med,process,gq,gdm):
    os.system('cp -r  /afs/cern.ch/user/p/pharris/pharris/public/bacon/Darkmatter/runMG13.sh .' )
    os.system('chmod +x runMG13.sh')
    if process == 800 : 
-      os.system('./runMG13.sh %d %d %d %s %d ' % (med,mass,gq,'V',1))
+      os.system('./runMG13.sh %d %d %f %s %d %f ' % (med,mass,gq,'V',1,gdm))
    if process == 801 : 
-      os.system('./runMG13.sh %d %d %d %s %d ' % (med,mass,gq,'A',1))
+      os.system('./runMG13.sh %d %d %f %s %d %f ' % (med,mass,gq,'A',1,gdm))
 
 
 def generateHFDM(mass,width,med,process,gq,gdm,finalstate):
@@ -216,7 +218,7 @@ def fileExists(filename,label):
    
 def loadmonojet(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
    #filename='MonoJ_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'_8TeV.root'
-   filename='MonoJ_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
+   filename='MonoJ_'+str(int(med))+'_'+str(int(dm))+'_'+str(gq)+'_'+str(int(proc))+'.root'
    if fileExists(filename,label):
       os.system('cmsStage /store/cmst3/group/monojet/mc/%s/%s .' %(label,filename))
    else:
@@ -226,9 +228,10 @@ def loadmonojet(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
       generateGen(xs[0],filename,label,False)
 
 def loadmonov(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
-   filename='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
+   filename='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(gq)+'_'+str(int(proc))+'.root'
+   print "!!!!! filename",filename
    if proc == 805 or proc == 806:
-      filename='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
+      filename='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(gq)+'_'+str(int(proc))+'.root'
    if fileExists(filename,label):
       os.system('cmsStage /store/cmst3/group/monojet/mc/%s/%s .' %(label,filename))
    else:
@@ -256,6 +259,7 @@ def loadbbDM(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
       generateGen(-1,filename,label,True)
             
 if __name__ == "__main__":
+    options = parser()
     print options.dm,options.med,options.width,options.proc
     if options.ttdm :
        loadttDM(options.dm,options.med,options.width,options.proc,options.gq,options.gdm,options.label,options.lhe)

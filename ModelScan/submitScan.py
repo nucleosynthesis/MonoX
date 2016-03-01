@@ -26,11 +26,14 @@ def localFileExists(filename):
    return int(exists) == 1
 
 aparser = argparse.ArgumentParser()
-aparser.add_argument('-dm' ,'--dmrange'   ,nargs='+',type=int,default=[1,5,10,25,50,100,150,200,300,400,500,600,700,800,900,1000,1250,1500,1750,2000])
+
+#aparser.add_argument('-dm' ,'--dmrange'   ,nargs='+',type=int,default=[1,5,10,25,50,125,100,150,200,300,400,500,600,700,800,900,1000,1250,1500,1750,2000])
+aparser.add_argument('-dm' ,'--dmrange'   ,nargs='+',type=int,default=[1,5,10,25,50,125,100,150])#,200,300,400,500,600,700,800,900,1000,1250,1500,1750,2000])
+#aparser.add_argument('-dm' ,'--dmrange'   ,nargs='+',type=int,default=[125,1750,2000])
 #aparser.add_argument('-med','--medrange'  ,nargs='+',type=int,default=[10,20,30,40,50,60,70,80,90,100,125,150,175,200,300,325,400,525,600,725,800,925,1000,1125,1200,1325,1400,1525,1600,1725,1800,1925,2000,2500,3000,3500,4000,5000])
-aparser.add_argument('-med','--medrange'  ,nargs='+',type=int,default=[50,100,150,200,300,325,400,525,600,725,800,925,1000,1125,1200,1325,1400,1525,1600,1725,1800,1925,2000,2500,3000,3500,4000,5000])
+aparser.add_argument('-med','--medrange'  ,nargs='+',type=int,default=[50,125,100,150,200,300,325,400,525,600,725,800,925,1000,1125,1200,1325,1400,1525,1600,1725,1800,1925,2000,2500,3000,3500,4000,5000])
 aparser.add_argument('-w'  ,'--widthrange',nargs='+',type=int,default=[1])
-aparser.add_argument('-proc','--procrange',nargs='+',type=int,default=[800,801,805,806])
+aparser.add_argument('-proc','--procrange',nargs='+',type=int,default=[800,801])
 aparser.add_argument('-q'   ,'--q'        ,nargs='+',type=str,default=['1nd'])
 aparser.add_argument('-o'   ,'--options'  ,nargs='+',type=str,default=[''])
 aparser.add_argument('-m'   ,'--mod'      ,nargs='+',type=int,default=[1])
@@ -62,6 +65,10 @@ if args.options[0].find('--monoZ') > 0:
     label='_5'
     option='--monoZ'
 
+if args.options[0].find('--bbDM') > 0:
+    label='_6'
+    option='--bbDM'
+
 if args.options[0].find('--generate') > 0:
     label=label+'g'
     generate=True
@@ -81,11 +88,15 @@ for dm in args.dmrange:
            for proc in args.procrange:
               if option == '--hinv' and (proc==800 or proc==801 or proc > 809 or dm != 1):
                  continue
-              if generate:
+              if generate or reweight:
                  checkFileName='MonoJ_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
                  if label.find('_1') > -1:
                     checkFileName='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
-                 if fileExists(checkFileName,'model3X'):
+                 if label.find('_4') > -1:
+                    checkFileName='MonoW_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
+                 if label.find('_5') > -1:
+                   checkFileName='MonoZ_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
+                 if fileExists(checkFileName,'model4X'):
                     continue
               if not generate:
                  if localFileExists('model_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'_0.root'):

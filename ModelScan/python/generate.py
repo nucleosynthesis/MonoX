@@ -11,7 +11,7 @@ def parser():
    parser.add_option('--med'  ,action='store',type='float',dest='med'   ,default=2000,help='Mediator Mass')
    parser.add_option('--width',action='store',type='float',dest='width' ,default=1,   help='Width (in Min width units)')
    parser.add_option('--proc' ,action='store',type='float',dest='proc'  ,default=806, help='Process(800=V,801=A,805=S,806=P)')
-   parser.add_option('--gq'   ,action='store',type='float',dest='gq'    ,default=1,   help='coupling to quarks')
+   parser.add_option('--gq'   ,action='store',type='float',dest='gq'    ,default=0.25,help='coupling to quarks')
    parser.add_option('--gdm'  ,action='store',type='float',dest='gdm'   ,default=1,   help='coupling to dark matter')
    parser.add_option('--label',action='store',type='string',dest='label',default='model3',help='eos label')
    parser.add_option('--monoV'   ,action='store_true',     dest='monov',default=False,help='Run mono V generation') # need a few more options for monoV
@@ -31,7 +31,7 @@ def generateMonoJet(mass,med,width,process,gq,gdm,lhe):
    os.system('cmsStage /store/cmst3/user/pharris/gen/POWHEG-BOX-V2_gen_8TeV.tar.gz .')
    os.system('tar xzvf POWHEG-BOX-V2_gen_8TeV.tar.gz')
    #dty='/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/MonoX/ModelScan/python'
-   print './run.py --med %d --dm %d --proc %d --g %d' % (med,mass,process,gq)
+   print './run.py --med %d --dm %d --proc %d --g %f' % (med,mass,process,gq)
    sub_file = open('runpowheg.sh','w')
    sub_file.write('#!/bin/bash\n')
    sub_file.write('scramv1 project CMSSW CMSSW_7_1_19 \n')
@@ -45,7 +45,7 @@ def generateMonoJet(mass,med,width,process,gq,gdm,lhe):
    if process > 804 and process < 808: 
       pwg='POWHEG-BOX-V2/DMS_tloop'
       sub_file.write('cd POWHEG-BOX-V2/DMS_tloop\n')
-   sub_file.write('./run.py --med %d --dm %d --proc %d --g %d \n' %  (med,mass,process,gq))
+   sub_file.write('./run.py --med %d --dm %d --proc %d --g %f \n' %  (med,mass,process,gq))
    sub_file.close()
    os.system('chmod +x %s' % os.path.abspath(sub_file.name))
    os.system('%s' % os.path.abspath(sub_file.name))
@@ -94,9 +94,9 @@ def generateMonoV_AV(mass,width,med,process,gq,gdm):
    os.system('cp -r  /afs/cern.ch/user/p/pharris/pharris/public/bacon/Darkmatter/runMG13.sh .' )
    os.system('chmod +x runMG13.sh')
    if process == 800 : 
-      os.system('./runMG13.sh %d %d %d %s %d ' % (med,mass,gq,'V',1))
+      os.system('./runMG13.sh %d %d %f %s %d %f ' % (med,mass,gq,'V',1,gdm))
    if process == 801 : 
-      os.system('./runMG13.sh %d %d %d %s %d ' % (med,mass,gq,'A',1))
+      os.system('./runMG13.sh %d %d %f %s %d %f ' % (med,mass,gq,'A',1,gdm))
 
 
 def generateHFDM(mass,width,med,process,gq,gdm,finalstate):
@@ -134,7 +134,7 @@ def generateMonoV_VH(mass,width,med,process,gq,gdm,label,filename,dty="/afs/cern
 def generateMonoVAH(mass,width,med,process,gq,gdm,label,filename,dty="/afs/cern.ch/user/p/pharris/pharris/public/bacon/Darkmatter"):
    os.system('cp %s/runJHU13.sh             .'%dty)
    os.system('./runJHU13.sh  %s %s %s        '% ( med, str(int(process)),filename))
-   os.system('cmsRm       /store/cmst3/group/monojet/mc/%s/%s ' %(label,filename))
+   os.system('%s rm       /store/cmst3/group/monojet/mc/%s/%s ' %(eos,label,filename))
    os.system('cmsStage %s /store/cmst3/group/monojet/mc/%s/%s ' %(filename,label,filename))
 
 def generateGen(xs,filename,label,monoV,dty="/afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/BaconAnalyzer/GenSelection/prod/"):
@@ -168,7 +168,7 @@ def generateGen(xs,filename,label,monoV,dty="/afs/cern.ch/user/p/pharris/pharris
    #sub_file.write('cp -r %s/../bin/files . \n' % dty)
    sub_file.write('runGen  -1 %s %s 0 \n' % (filename,xs))
    sub_file.write('mv Output.root %s \n' % filename)
-   sub_file.write('cmsRm       /store/cmst3/group/monojet/mc/%s/%s \n' %(label,filename))
+   sub_file.write('%s rm       /store/cmst3/group/monojet/mc/%s/%s \n' %(eos,label,filename))
    sub_file.write('cmsStage %s /store/cmst3/group/monojet/mc/%s/%s \n' %(filename,label,filename))
    #sub_file.write('cmsRm       /store/cmst3/user/pharris/mc/%s/%s \n' %(label,filename))
    #sub_file.write('cmsStage %s /store/cmst3/user/pharris/mc/%s/%s \n' %(filename,label,filename))
@@ -217,8 +217,8 @@ def fileExists(filename,label):
    return int(exists) == 1
    
 def loadmonojet(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
-   filename='MonoJ_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
    #filename='MonoJ_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'_8TeV.root'
+   filename='MonoJ_'+str(int(med))+'_'+str(int(dm))+'_'+str(gq)+'_'+str(int(proc))+'.root'
    if fileExists(filename,label):
       os.system('cmsStage /store/cmst3/group/monojet/mc/%s/%s .' %(label,filename))
    else:
@@ -228,19 +228,20 @@ def loadmonojet(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
       generateGen(xs[0],filename,label,False)
 
 def loadmonov(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
-   filename='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
+   filename='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(gq)+'_'+str(int(proc))+'.root'
+   print "!!!!! filename",filename
    if proc == 805 or proc == 806:
-      filename='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
+      filename='MonoV_'+str(int(med))+'_'+str(int(dm))+'_'+str(gq)+'_'+str(int(proc))+'.root'
    if fileExists(filename,label):
       os.system('cmsStage /store/cmst3/group/monojet/mc/%s/%s .' %(label,filename))
    else:
       if proc == 800 or proc == 801 or proc == 810 or proc == 811 or proc == 820 or proc == 821 : 
          generateMonoV_AV(dm,width,med,proc,gq,gdm)
-         generateGen(-1,filename,label,True)
+         generateGen(-1,filename,'model3',True)
       else :
          #generateMonoV_VH(dm,width,med,proc,gq,gdm,label,filename)
-         generateMonoVAH(dm,width,med,proc,gq,gdm,label,filename)
-
+         generateMonoVAH(dm,width,med,proc,gq,gdm,'model3',filename)
+         
 def loadttDM(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
    filename='ttDM_'+str(int(med))+'_'+str(int(dm))+'_'+str(int(width))+'_'+str(int(proc))+'.root'
    if fileExists(filename,label):
@@ -258,7 +259,7 @@ def loadbbDM(dm,med,width=1,proc=805,gq=1,gdm=1,label='model3',lhe=False):
       generateGen(-1,filename,label,True)
             
 if __name__ == "__main__":
-    optinos = parser()
+    options = parser()
     print options.dm,options.med,options.width,options.proc
     if options.ttdm :
        loadttDM(options.dm,options.med,options.width,options.proc,options.gq,options.gdm,options.label,options.lhe)
@@ -271,4 +272,4 @@ if __name__ == "__main__":
     if not options.monov : 
        loadmonojet(options.dm,options.med,options.width,options.proc,options.gq,options.gdm,options.label,options.lhe)
     else : 
-       loadmonov(options.dm,options.med,options.width,options.proc,options.gq,options.gdm,options.label,options.lhe)
+       loadmonov(options.dm,options.med,options.width,options.proc,options.gq,options.gdm,options.label+'M',options.lhe)
