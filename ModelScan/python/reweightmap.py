@@ -17,7 +17,7 @@ samples = {
 
     'tree_Vector_MonoZ.root'                   : [23,800,10000, 50],
     'tree_Axial_MonoZ.root'                    : [23,801,10000, 50],
-    #'tree_Scalar_MonoZ.root'                   : [23,805,10000, 50],
+    'tree_Scalar_MonoZ.root'                   : [23,805,10000, 50],
     'tree_Pseudoscalar_MonoZ.root'             : [23,806,10000, 50],
 }
 def filtered(iSamples,iEntry,iVal):
