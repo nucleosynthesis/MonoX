@@ -61,13 +61,20 @@ def fixNorm(filename,treename,cut):
    scale=float(lTree.GetEntriesFast())/float(lTree.GetEntries(cut))
    return scale
 
-def makeHist(filename,var,baseweight,treename,label,normalize=''):
+def makeHist(filename,var,baseweight,treename,label,normalize='',iMonoVBin=False):
    x = array( 'd' )
-   y=range(0,1000,25)
+   y=mjrbins
+   if iMonoVBin==1:
+      y=mvrbins
+   if iMonoVBin==2:
+      y=mjgbins
+   if iMonoVBin==3:
+      y=mvgbins
    #y=[0.0,100.0,200.0,210.0,220.0,230.0,240.0,250.0 , 260.0 , 270.0 , 280.0 , 290.0 , 300.0 , 310.0 , 320.0 , 330.0,340,360,380,420,710,1200,1500,2000]
    #y=[0.0,100.0,200.0,300,400,500,600,700,800,900,1000,1100,1200]
    for i0  in range(0,len(y)):
       x.append(y[i0])
+   print var,label,baseweight
    if len(filename) != 0:
       lFile = ROOT.TFile.Open(filename)
       lTree = lFile.Get(treename)
@@ -81,6 +88,16 @@ def makeHist(filename,var,baseweight,treename,label,normalize=''):
       print "NORM : ",normalize,baseweight
       lHist.Scale(1./lTree.GetEntries(normalize))
    return lHist
+
+def makeFile(filename,treename,var='pfMetPt'): #pfMetPt
+   outfilename=treename+".root"
+   lFile = ROOT.TFile(outfilename,"RECREATE")
+   h1=makeHist(filename,var,mjrcut,treename,treename+'_monojet','',0)
+   h2=makeHist(filename,var,mvrcut,treename,treename+'_monov'  ,'',1)
+   lFile.cd()
+   h1.Write()
+   h2.Write()
+   lFile.Close()
 
 def reweight(label,DM,Med,Width,gq,gdm,process,basentuple,basename,basecut,basecutReco,iOutputName,iVId=0,iBR=1):
    xs = [1,1]
@@ -105,6 +122,9 @@ def reweight(label,DM,Med,Width,gq,gdm,process,basentuple,basename,basecut,basec
    var2="genMediatorPt"
    Norm1='(v_pt > 0)'
    Norm2=''
+   useMonoVBin=2
+   if basecut.find('fjm') > 0: 
+      useMonoVBin=3
    if iVId > 0:
       var1="v_pt"
       var2="genVBosonPt"
@@ -116,11 +136,12 @@ def reweight(label,DM,Med,Width,gq,gdm,process,basentuple,basename,basecut,basec
          weight1=weight1+"*"+str(getXS(Med,iVId))
       weight1=weight1+"*1000*"+basecut.replace("23","23")+"*"
       Norm1='(abs(v_id) == '+str(iVId)+')'
-      
-   h1=makeHist(label     ,var1,weight1+Norm1,'Events','model',Norm1)
-   h2=makeHist(basentuple,var2,weight2+Norm2,basename,'base' ,Norm2)           
+
+   h1=makeHist(label     ,var1,weight1+Norm1,'Events','model',Norm1,useMonoVBin)
+   h2=makeHist(basentuple,var2,weight2+Norm2,basename,'base' ,Norm2,useMonoVBin)           
    if int(iVId) == 23 and process < 802:
       h1.Scale(1./fixNorm(label,"Events",Norm1))
+   #h1.Scale(h2.Integral()/h1.Integral())
    print h1.Integral(),h2.Integral()
    can= ROOT.TCanvas("C","C",800,600)
    h1.Draw()
@@ -145,6 +166,7 @@ def reweightNtuple(iFile,iTreeName,iHistName,iOTreeName,iClass,iMonoV,iHiggsPt=F
    lTree  = lFile.Get(iTreeName)
    lOFile = ROOT.TFile('tmpRWTree%s' % (iHistName),'RECREATE')
    lFTree = lTree.CopyTree(iClass)
+   #lFTree = lTree.CopyTree('')
    lOTree = lFTree.CloneTree(0)
    lOTree.SetTitle(iOTreeName)
    lOTree.SetName(iOTreeName)
@@ -154,10 +176,9 @@ def reweightNtuple(iFile,iTreeName,iHistName,iOTreeName,iClass,iMonoV,iHiggsPt=F
    lOTree.SetBranchAddress("weight",w1)
    for i0 in range(lFTree.GetEntriesFast()):
       lFTree.GetEntry(i0)
-      #if iMonoV:
-      #   genpt = lTree.genvpt
-      #else:
       genpt = lFTree.genMediatorPt
+      if iMonoV:
+         genpt = lTree.genVBosonPt
       w1[0] = 1
       w2[0] = lFTree.weight
       w1[0] = h1.GetBinContent(h1.FindBin(genpt))*baseweight
@@ -230,6 +251,7 @@ if __name__ == "__main__":
       reweightNtuple(basetree,trees,'ggHRWmonojet.root',treeName(proc,med,dm,gq,baseid),idcut,monoV)
       if i0 > 0:
          os.system('hadd tmp2TreeggHRWmonojet.root RWTreeggHRWmonojet.root tmpRWTreeggHRWmonojet.root')
+         os.system('cp RWTreeggHRWmonojet.root tmpXRWTreeggHRWmonojet.root')
          os.system('mv tmp2TreeggHRWmonojet.root tmpRWTreeggHRWmonojet.root')
       os.system('mv tmpRWTreeggHRWmonojet.root RWTreeggHRWmonojet.root')
 
@@ -240,4 +262,5 @@ if __name__ == "__main__":
       name=name.replace('MonoJ','MonoW')
    os.system('%s rm  eos/cms/store/cmst3/group/monojet/mc/model4/%s' % (eos,name))
    os.system('cmsStage RWTreeggHRWmonojet.root /store/cmst3/group/monojet/mc/model4/%s' % name)
-   
+   makeFile('RWTreeggHRWmonojet.root',treeName(proc,med,dm,gq,baseid))
+   os.system('cp %s.root %s/output/' % (treeName(proc,med,dm,gq,baseid),basedir))

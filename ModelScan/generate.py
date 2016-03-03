@@ -11,7 +11,7 @@ def parser():
    parser.add_option('--med'  ,action='store',type='float',dest='med'   ,default=2000,help='Mediator Mass')
    parser.add_option('--width',action='store',type='float',dest='width' ,default=1,   help='Width (in Min width units)')
    parser.add_option('--proc' ,action='store',type='float',dest='proc'  ,default=806, help='Process(800=V,801=A,805=S,806=P)')
-   parser.add_option('--gq'   ,action='store',type='float',dest='gq'    ,default=0.25,help='coupling to quarks')
+   parser.add_option('--gq'   ,action='store',type='float',dest='gq'    ,default=1,   help='coupling to quarks')
    parser.add_option('--gdm'  ,action='store',type='float',dest='gdm'   ,default=1,   help='coupling to dark matter')
    parser.add_option('--label',action='store',type='string',dest='label',default='model3',help='eos label')
    parser.add_option('--monoV'   ,action='store_true',     dest='monov',default=False,help='Run mono V generation') # need a few more options for monoV

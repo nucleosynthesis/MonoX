@@ -5,20 +5,77 @@ from array import array
 
 #Available samples
 samples = { 
-    'tree_Vector_MonoJ.root'                   : [0,800,10000, 50],
-    'tree_Axial_MonoJ.root'                    : [0,801,10000, 50],
-    'tree_Scalar_MonoJ.root'                   : [0,805,10000, 50],
-    'tree_Pseudoscalar_MonoJ.root'             : [0,806,10000, 50],
+    'tree_Vector_MonoJ300.root'                : [0,800,150,     1],
+    'tree_Vector_MonoJ300_1000.root'           : [0,800,500,     1],
+    'tree_Vector_MonoJ1000.root'               : [0,800,1000,    1],
+    'tree_Vector_MonoJoffshell.root'           : [0,800,1,   10000],
 
-    'tree_Vector_MonoW.root'                   : [24,800,10000, 50],
-    'tree_Axial_MonoW.root'                    : [24,801,10000, 50],
-    'tree_Scalar_MonoW.root'                   : [24,805,10000, 50],
-    'tree_Pseudoscalar_MonoW.root'             : [24,806,10000, 50],
+    'tree_Axial_MonoJ300.root'                 : [0,801,150,     1],
+    'tree_Axial_MonoJ300_1000.root'            : [0,801,500,     1],
+    'tree_Axial_MonoJ1000.root'                : [0,801,1000,    1],
+    'tree_Axial_MonoJoffshell.root'            : [0,801,1,   10000],
 
-    'tree_Vector_MonoZ.root'                   : [23,800,10000, 50],
-    'tree_Axial_MonoZ.root'                    : [23,801,10000, 50],
-    'tree_Scalar_MonoZ.root'                   : [23,805,10000, 50],
-    'tree_Pseudoscalar_MonoZ.root'             : [23,806,10000, 50],
+    'tree_Scalar_MonoJ300.root'                : [0,805,150,     1],
+    'tree_Scalar_MonoJ300_1000.root'           : [0,805,500,     1],
+    'tree_Scalar_MonoJ1000.root'               : [0,805,1000,    1],
+    'tree_Scalar_MonoJoffshell.root'           : [0,805,1,   10000],
+
+    'tree_Pseudoscalar_MonoJ300.root'          : [0,806,150,     1],
+    'tree_Pseudoscalar_MonoJ300_1000.root'     : [0,806,500,     1],
+    'tree_Pseudoscalar_MonoJ1000.root'         : [0,806,1000,    1],
+    'tree_Pseudoscalar_MonoJoffshell.root'     : [0,806,1,   10000],
+
+    'tree_Vector_MonoZ300.root'                : [23,800,150,     1],
+    'tree_Vector_MonoZ300_1000.root'           : [23,800,500,     1],
+    'tree_Vector_MonoZ1000.root'               : [23,800,1000,    1],
+    'tree_Vector_MonoZoffshell.root'           : [23,800,1,   10000],
+
+    'tree_Axial_MonoZ300.root'                 : [23,801,150,     1],
+    'tree_Axial_MonoZ300_1000.root'            : [23,801,500,     1],
+    'tree_Axial_MonoZ1000.root'                : [23,801,1000,    1],
+    'tree_Axial_MonoZoffshell.root'            : [23,801,1,   10000],
+
+    'tree_Scalar_MonoZ300.root'                : [23,805,150,     1],
+    'tree_Scalar_MonoZ300_1000.root'           : [23,805,500,     1],
+    #'tree_Scalar_MonoJ1000.root'               : [23,805,1000,    1],
+    'tree_Scalar_MonoZoffshell.root'           : [23,805,1,   10000],
+
+    'tree_Pseudoscalar_MonoZ300.root'          : [23,806,150,     1],
+    'tree_Pseudoscalar_MonoZ300_1000.root'     : [23,806,500,     1],
+    'tree_Pseudoscalar_MonoZ1000.root'         : [23,806,1000,    1],
+    'tree_Pseudoscalar_MonoZoffshell.root'     : [23,806,1,   10000],
+
+    'tree_Vector_MonoW300.root'                : [24,800,150,     1],
+    'tree_Vector_MonoW300_1000.root'           : [24,800,500,     1],
+    'tree_Vector_MonoW1000.root'               : [24,800,1000,    1],
+    'tree_Vector_MonoWoffshell.root'           : [24,800,1,   10000],
+
+    'tree_Axial_MonoW300.root'                 : [24,801,150,     1],
+    'tree_Axial_MonoW300_1000.root'            : [24,801,500,     1],
+    'tree_Axial_MonoW1000.root'                : [24,801,1000,    1],
+    'tree_Axial_MonoWoffshell.root'            : [24,801,1,   10000],
+
+    'tree_Scalar_MonoW300.root'                : [24,805,150,     1],
+    'tree_Scalar_MonoW300_1000.root'           : [24,805,500,     1],
+    'tree_Scalar_MonoW1000.root'               : [24,805,1000,    1],
+    'tree_Scalar_MonoWoffshell.root'           : [24,805,1,   10000],
+
+    'tree_Pseudoscalar_MonoW300.root'          : [24,806,150,     1],
+    'tree_Pseudoscalar_MonoW300_1000.root'     : [24,806,500,     1],
+    'tree_Pseudoscalar_MonoW1000.root'         : [24,806,1000,    1],
+    'tree_Pseudoscalar_MonoWoffshell.root'     : [24,806,1,   10000]
+
+#    'tree_Axial_MonoJ.root'                    : [0,801,10000, 50],
+#    'tree_Scalar_MonoJ.root'                   : [0,805,10000, 50],
+#    'tree_Pseudoscalar_MonoJ.root'             : [0,806,10000, 50],
+#    'tree_Vector_MonoW.root'                   : [24,800,10000, 50],
+#    'tree_Axial_MonoW.root'                    : [24,801,10000, 50],
+#    'tree_Scalar_MonoW.root'                   : [24,805,10000, 50],
+#    'tree_Pseudoscalar_MonoW.root'             : [24,806,10000, 50],
+#    'tree_Vector_MonoZ.root'                   : [23,800,10000, 50],
+#    'tree_Axial_MonoZ.root'                    : [23,801,10000, 50],
+#    'tree_Scalar_MonoZ.root'                   : [23,805,10000, 50],
+#    'tree_Pseudoscalar_MonoZ.root'             : [23,806,10000, 50],
 }
 def filtered(iSamples,iEntry,iVal):
     oSamples = {}
@@ -84,20 +141,20 @@ def obtainbase(iId,dm,med,proc,hinv):
         print "Process not found!!!!",proc,iId
         output=['H125_Gen.root','ggH125_signal']
         return output
-    
+
     isExact = True
     #Step 3 filter by offshell or on shell
     dMass = offshell(dProcess,(dm > 0.5*med))
     if len(dMass) == 0: 
         isExact = False
-    if dm < med and len(dMass) == 0: #Default to onshell if ti fails
+    if dm < 10*med and len(dMass) == 0: #Default to onshell if ti fails
         dMass = offshell(dProcess,not (dm > 0.5*med))
-        
+    
     #Step 4 find the nearest Mediator
     dMed = filtered(dMass,2,med)
     if len(dMed) == 0: 
         isExact = False
-    dMed = nearest(dMass,2,med)
+        dMed = nearest(dMass,2,med)
     
     #Step 5 find the nearest DM candidate
     final = nearest(dMed,3,dm)
